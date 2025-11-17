@@ -31,7 +31,7 @@ class MainMenu extends StatelessWidget {
       ),
     );
 
-    final gregImage = Image.asset('/Assets/Images/greg.png', fit:BoxFit.cover);
+    final gregImage = Image.asset('Assets/images/greg.png', fit:BoxFit.contain);
 
     final loanButton = ElevatedButton(
       style: ButtonStyle(
@@ -62,18 +62,11 @@ class MainMenu extends StatelessWidget {
 
     );
 
-
-
-
-
-
-
-
-
     return Scaffold (
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             topRow
           ], // <Widget>[]
