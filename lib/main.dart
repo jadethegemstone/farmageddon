@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'Pages/main_menu.dart';
 
 class theColors {
-  static const Color pageColor = Color(0xFFed7dac);
+  static const Color lightPink = Color(0xFFed7dac);
+  static const Color darkPink = Color(0xFFe42178);
 }
 
 void main() {
@@ -13,6 +14,6 @@ void main() {
         '/': (context) => const MainMenu()
       },
       debugShowCheckedModeBanner: false,
-      theme: new ThemeData(scaffoldBackgroundColor: theColors.pageColor)
+      theme: new ThemeData(scaffoldBackgroundColor: theColors.lightPink)
     ));
 }
