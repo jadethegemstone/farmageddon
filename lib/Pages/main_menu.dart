@@ -47,7 +47,7 @@ class MainMenu extends StatelessWidget {
           foregroundColor: WidgetStateProperty.all(theColors.darkPink)),
       child: const Text('I NEED A LOAN'),
       onPressed: () {
-        Navigator.pushNamed(context, '/second');
+        Navigator.pushNamed(context, '/loan');
       },
     );
 
