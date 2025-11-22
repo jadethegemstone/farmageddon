@@ -15,8 +15,6 @@ class MainMenu extends StatelessWidget {
     final M = context.fontM;
     final S = context.fontS;
 
-
-
     final topTitle = Padding(
       padding: EdgeInsets.all(10),
       child: Text(
@@ -65,129 +63,6 @@ class MainMenu extends StatelessWidget {
       },
     );
 
-    final slotButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.white),
-        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: width * .003, color: theColors.darkPink),
-          ),
-        ),
-        padding: WidgetStateProperty.all(EdgeInsets.zero),
-      ),
-      child: SizedBox(
-        width: width * .13,
-        height: width * .13,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-             Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
-             Text('SLOTS',
-                 style: TextStyle(
-                     fontWeight: FontWeight.bold,
-                     fontSize: S,
-                     color: Colors.white,
-                     shadows: [
-                       Shadow(
-                           offset: Offset(2, 2),
-                           blurRadius: 3,
-                           color: Colors.black
-                       )
-                     ]
-                 )
-             ),
-          ],
-        ),
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, '/slots');
-      },
-    );
-
-    final plinkoButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.white),
-        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: width * .003, color: theColors.darkPink),
-          ),
-        ),
-        padding: WidgetStateProperty.all(EdgeInsets.zero),
-      ),
-      child: SizedBox(
-        width: width * .13,
-        height: width * .13,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
-            Text('PLINKO',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: S,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(2, 2),
-                          blurRadius: 3,
-                          color: Colors.black
-                      )
-                    ]
-                )
-            ),
-          ],
-        ),
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, '/plinko');
-      },
-    );
-
-    final BJButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.white),
-        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: width * .003, color: theColors.darkPink),
-          ),
-        ),
-        padding: WidgetStateProperty.all(EdgeInsets.zero),
-      ),
-      child: SizedBox(
-        width: width * .13,
-        height: width * .13,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
-            Text('BLACKJACK',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: S,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(2, 2),
-                          blurRadius: 3,
-                          color: Colors.black
-                      )
-                    ]
-                )
-            ),
-          ],
-        ),
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, '/blackjack');
-      },
-    );
-
     final homelessAntImg = SizedBox(
       width: width * .25,
       child: AspectRatio(aspectRatio: 500 / 600,
@@ -196,7 +71,6 @@ class MainMenu extends StatelessWidget {
     );
 
     final topRowColLeft = Container (
-      // padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       decoration: BoxDecoration(
           color: Colors.black,
           border: Border.all(width: 5, color: Colors.black),
@@ -207,7 +81,6 @@ class MainMenu extends StatelessWidget {
     );
 
     final topRowColRight = Container (
-      // padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       child: Column(children:[gregImage, loanButton]),
     );
 
@@ -217,8 +90,12 @@ class MainMenu extends StatelessWidget {
           children:[topRowColLeft, topRowColRight]),
     );
     final bottomRow = Container (
-      child: Row(mainAxisAlignment: MainAxisAlignment.center,
-          children: [slotButton, plinkoButton, BJButton, homelessAntImg])
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/Images/greg.png'),
+            CircleGameButton(label: 'PLINKO', route: '/plinko', imagePath: 'Assets/Images/greg.png'),
+            CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/homelessAnt.png'),
+            homelessAntImg])
     );
 
     return Scaffold (
@@ -231,6 +108,66 @@ class MainMenu extends StatelessWidget {
           ], // <Widget>[]
         ), // Column
       ), // Center
+    );
+  }
+}
+
+
+class CircleGameButton extends StatelessWidget {
+  final String label;
+  final String route;
+  final String imagePath;
+  
+  const CircleGameButton({
+    Key? key,
+    required this.label,
+    required this.route,
+    required this.imagePath
+  }) : super (key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final width = context.screenWidth;
+    final S = context.fontS;
+    return ElevatedButton (
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.white),
+        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(1000),
+            side: BorderSide(width: width * .003, color: theColors.darkPink),
+          ),
+        ),
+        padding: WidgetStateProperty.all(EdgeInsets.zero),
+      ),
+      child: SizedBox (
+        width: width * .13,
+        height: width * .13,
+        child: (
+          Stack (
+            alignment: Alignment.center,
+            children: [
+              Image.asset(imagePath, fit: BoxFit.cover,),
+              Text(label,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: S,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          offset: Offset(2, 2),
+                          blurRadius: 3,
+                          color: Colors.black
+                      )
+                    ]
+                ),
+              )
+            ],
+          )
+        ),
+      ),
+      onPressed: () => Navigator.pushNamed(context, route),
     );
   }
 }
