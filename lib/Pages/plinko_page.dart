@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 
-class LoanPage extends StatelessWidget {
-  const LoanPage({Key? key}) : super(key: key);
+class PlinkoPage extends StatelessWidget {
+  const PlinkoPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class LoanPage extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text('This is the loan page, click to go back',
+          child: Text('This is the plinko page, click to go back',
             style: TextStyle(
               fontSize: L
             )

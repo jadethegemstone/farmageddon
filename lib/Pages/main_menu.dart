@@ -7,35 +7,45 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const topTitle = Padding(
-      padding: EdgeInsets.all(20),
+    final width = context.screenWidth;
+    final height = context.screenHeight;
+    final XXL = context.fontXXL;
+    final XL = context.fontXL;
+    final L = context.fontL;
+    final M = context.fontM;
+    final S = context.fontS;
+
+
+
+    final topTitle = Padding(
+      padding: EdgeInsets.all(10),
       child: Text(
         'WELCOME TO THE',
         textAlign: TextAlign.left,
         style: TextStyle(
           fontWeight: FontWeight.w800,
           letterSpacing: 0.5,
-          fontSize: 50,
+          fontSize: XL,
           color: Colors.white,
         ),
       ),
     );
 
-    const bottomTitle = Padding(
-      padding: EdgeInsets.all(20),
+    final bottomTitle = Padding(
+      padding: EdgeInsets.all(10),
       child: Text(
         'FARMAGEDDON',
         style: TextStyle(
           fontWeight: FontWeight.w800,
           letterSpacing: 0.5,
-          fontSize: 75,
+          fontSize: XXL,
           color: theColors.darkPink,
         ),
       ),
     );
 
     final gregImage = SizedBox(
-      width: 500,
+      width: width * 0.30,
       child: AspectRatio(aspectRatio: 500 / 290,
           child: Image.asset('Assets/images/greg.png', fit: BoxFit.cover, alignment: Alignment.topCenter)
       ),
@@ -45,7 +55,11 @@ class MainMenu extends StatelessWidget {
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.white),
           foregroundColor: WidgetStateProperty.all(theColors.darkPink)),
-      child: const Text('I NEED A LOAN'),
+      child: Text('I NEED A LOAN',
+        style: TextStyle(
+          fontSize: M,
+        ),
+      ),
       onPressed: () {
         Navigator.pushNamed(context, '/loan');
       },
@@ -58,32 +72,37 @@ class MainMenu extends StatelessWidget {
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: 5, color: theColors.darkPink),
+            side: BorderSide(width: width * .003, color: theColors.darkPink),
           ),
         ),
+        padding: WidgetStateProperty.all(EdgeInsets.zero),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset('Assets/Images/greg.png', width: 300, height: 300, fit: BoxFit.cover),
-          const Text('SLOTS',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                    offset: Offset(2, 2),
-                    blurRadius: 3,
-                    color: Colors.black
-                )
-              ]
-            )
-          ),
-        ],
+      child: SizedBox(
+        width: width * .13,
+        height: width * .13,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+             Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
+             Text('SLOTS',
+                 style: TextStyle(
+                     fontWeight: FontWeight.bold,
+                     fontSize: S,
+                     color: Colors.white,
+                     shadows: [
+                       Shadow(
+                           offset: Offset(2, 2),
+                           blurRadius: 3,
+                           color: Colors.black
+                       )
+                     ]
+                 )
+             ),
+          ],
+        ),
       ),
       onPressed: () {
-        Navigator.pushNamed(context, '/second');
+        Navigator.pushNamed(context, '/slots');
       },
     );
 
@@ -94,32 +113,37 @@ class MainMenu extends StatelessWidget {
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: 5, color: theColors.darkPink),
+            side: BorderSide(width: width * .003, color: theColors.darkPink),
           ),
         ),
+        padding: WidgetStateProperty.all(EdgeInsets.zero),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset('Assets/Images/greg.png', width: 300, height: 300, fit: BoxFit.cover),
-          const Text('PLINKO',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                        offset: Offset(2, 2),
-                        blurRadius: 3,
-                        color: Colors.black
-                    )
-                  ]
-              )
-          ),
-        ],
+      child: SizedBox(
+        width: width * .13,
+        height: width * .13,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
+            Text('PLINKO',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: S,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          offset: Offset(2, 2),
+                          blurRadius: 3,
+                          color: Colors.black
+                      )
+                    ]
+                )
+            ),
+          ],
+        ),
       ),
       onPressed: () {
-        Navigator.pushNamed(context, '/second');
+        Navigator.pushNamed(context, '/plinko');
       },
     );
 
@@ -130,44 +154,49 @@ class MainMenu extends StatelessWidget {
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: 5, color: theColors.darkPink),
+            side: BorderSide(width: width * .003, color: theColors.darkPink),
           ),
         ),
+        padding: WidgetStateProperty.all(EdgeInsets.zero),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset('Assets/Images/greg.png', width: 300, height: 300, fit: BoxFit.cover),
-          const Text('BlackJack',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                        offset: Offset(2, 2),
-                        blurRadius: 3,
-                        color: Colors.black
-                    )
-                  ]
-              )
-          ),
-        ],
+      child: SizedBox(
+        width: width * .13,
+        height: width * .13,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset('Assets/Images/greg.png', fit: BoxFit.cover),
+            Text('BLACKJACK',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: S,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          offset: Offset(2, 2),
+                          blurRadius: 3,
+                          color: Colors.black
+                      )
+                    ]
+                )
+            ),
+          ],
+        ),
       ),
       onPressed: () {
-        Navigator.pushNamed(context, '/second');
+        Navigator.pushNamed(context, '/blackjack');
       },
     );
 
     final homelessAntImg = SizedBox(
-      width: 500,
+      width: width * .25,
       child: AspectRatio(aspectRatio: 500 / 600,
           child: Image.asset('Assets/images/homelessAnt.png', fit: BoxFit.cover, alignment: Alignment.topCenter)
       ),
     );
 
     final topRowColLeft = Container (
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+      // padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       decoration: BoxDecoration(
           color: Colors.black,
           border: Border.all(width: 5, color: Colors.black),
@@ -178,7 +207,7 @@ class MainMenu extends StatelessWidget {
     );
 
     final topRowColRight = Container (
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+      // padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       child: Column(children:[gregImage, loanButton]),
     );
 
