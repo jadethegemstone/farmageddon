@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'layout.dart';
+
 import 'Pages/main_menu.dart';
 import 'Pages/loan_page.dart';
 import 'Pages/slots_page.dart';
 import 'Pages/plinko_page.dart';
 import 'Pages/blackjack_page.dart';
+
 
 class theColors {
   static const Color lightPink = Color(0xFFed7dac);
@@ -26,11 +29,11 @@ void main() {
     runApp(MaterialApp(
       initialRoute: '/',
       routes: {
-        '/': (context) => const MainMenu(),
-        '/loan': (context) => LoanPage(),
-        '/slots': (context) => SlotsPage(),
-        '/plinko': (context) => PlinkoPage(),
-        '/blackjack': (context) => BlackjackPage(),
+        '/': (context) => AppLayout(child: MainMenu()),
+        '/loan': (context) => AppLayout(child: LoanPage()),
+        '/slots': (context) => AppLayout(child: SlotsPage()),
+        '/plinko': (context) => AppLayout(child: PlinkoPage()),
+        '/blackjack': (context) => AppLayout(child: BlackjackPage()),
       },
       debugShowCheckedModeBanner: false,
       theme: new ThemeData(scaffoldBackgroundColor: theColors.lightPink)

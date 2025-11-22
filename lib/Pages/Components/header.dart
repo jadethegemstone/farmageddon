@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../main.dart';
+import '../../main.dart';
 
-class LoanPage extends StatelessWidget {
-  const LoanPage({Key? key}) : super(key: key);
+class Header extends StatelessWidget {
+  const Header({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +14,11 @@ class LoanPage extends StatelessWidget {
     final M = context.fontM;
     final S = context.fontS;
 
-    const int lives = 5;
-
     final backButton = ElevatedButton(
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.white),
           foregroundColor: WidgetStateProperty.all(theColors.darkPink)),
-      child: Text('This is the loan page, click to go back',
+      child: Text('Back to menu',
         style: TextStyle(
           fontSize: M,
         ),
@@ -30,15 +28,13 @@ class LoanPage extends StatelessWidget {
       },
     );
 
-    return Scaffold(
-      body: Center(
-        child:
-          Row(
-            children: [
+    return Container(
+      child:
+        Row( mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
               backButton
-          ]
-        ),
-      ), // Center
+            ]
+        ), // Center
     ); // Scaffold
   }
 }
