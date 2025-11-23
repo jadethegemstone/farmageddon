@@ -64,7 +64,7 @@ class MainMenu extends StatelessWidget {
     );
 
     final homelessAntImg = SizedBox(
-      width: width * .25,
+      width: width * .2,
       child: AspectRatio(aspectRatio: 500 / 600,
           child: Image.asset('Assets/images/homelessAnt.png', fit: BoxFit.cover, alignment: Alignment.topCenter)
       ),
@@ -73,7 +73,6 @@ class MainMenu extends StatelessWidget {
     final topRowColLeft = Container (
       decoration: BoxDecoration(
           color: Colors.black,
-          border: Border.all(width: 5, color: Colors.black),
           borderRadius: BorderRadius.circular(30)
       ),
       child: Column(

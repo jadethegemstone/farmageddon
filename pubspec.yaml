@@ -60,6 +60,9 @@ flutter:
     - Assets/images/homelessAnt.png
     - Assets/images/heartfull.png
     - Assets/images/heartempty.png
+    - Assets/images/fish.png
+    - Assets/images/apple.png
+    - Assets/images/banana.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
