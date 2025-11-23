@@ -14,7 +14,6 @@ class LoanPage extends StatelessWidget {
     final M = context.fontM;
     final S = context.fontS;
 
-    const int lives = 5;
 
     final backButton = ElevatedButton(
       style: ButtonStyle(
@@ -35,7 +34,7 @@ class LoanPage extends StatelessWidget {
         child:
           Row(
             children: [
-              backButton
+              // backButton
           ]
         ),
       ), // Center
