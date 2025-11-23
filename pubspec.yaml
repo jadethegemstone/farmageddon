@@ -63,6 +63,8 @@ flutter:
     - Assets/images/fish.png
     - Assets/images/apple.png
     - Assets/images/banana.png
+    - Assets/images/slots/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
