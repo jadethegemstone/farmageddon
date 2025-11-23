@@ -111,7 +111,6 @@ class MainMenu extends StatelessWidget {
   }
 }
 
-
 class CircleGameButton extends StatelessWidget {
   final String label;
   final String route;
