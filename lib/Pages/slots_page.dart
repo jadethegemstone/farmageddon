@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
 
 class SlotsPage extends StatefulWidget {
@@ -97,6 +98,8 @@ class SlotsPage extends StatefulWidget {
                   slot2 = randomSlot();
                   slot3 = randomSlot();
                 });
+                final gameState = context.read<GameState>();
+                gameState.subtractBalance(100);
               },
               child: Container(
                 width: width * 0.08,

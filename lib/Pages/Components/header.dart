@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../main.dart';
 
-class Header extends StatelessWidget {
+class Header extends StatefulWidget {
   const Header({Key? key}) : super(key: key);
 
   @override
+  State<Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+
+  @override
   Widget build(BuildContext context) {
+    final gameState = context.watch<GameState>();
+
     final width = context.screenWidth;
     final height = context.screenHeight;
     final XXL = context.fontXXL;
@@ -15,17 +24,6 @@ class Header extends StatelessWidget {
     final L = context.fontL;
     final M = context.fontM;
     final S = context.fontS;
-
-    // hearts
-    const int totalLives = 5;
-    const int lives = 1;
-
-    // power ups
-    const int fish = 0;
-    const int apple = 0;
-    const int banana = 0;
-
-    const int balance = 0;
 
     final backButton = ElevatedButton(
       style: ButtonStyle(
@@ -55,20 +53,20 @@ class Header extends StatelessWidget {
     final hearts = Row(
       children: [
         // Full hearts
-        for (int i = 0; i < lives; i++) ...[
+        for (int i = 0; i < gameState.lives; i++) ...[
           SizedBox(
               width: width * .03,
               child: PixelArtImage(assetPath: 'Assets/images/heartfull.png')
           ),
-          if (i < totalLives - 1) SizedBox(width: width * 0.01),
+          if (i < gameState.totalLives - 1) SizedBox(width: width * 0.01),
         ],
         // Empty hearts
-        for (int i = 0; i < (totalLives - lives); i++) ...[
+        for (int i = 0; i < (gameState.totalLives - gameState.lives); i++) ...[
           SizedBox(
               width: width * .03,
               child: PixelArtImage(assetPath: 'Assets/images/heartempty.png')
           ),
-          if (i < (totalLives - lives) - 1) SizedBox(width: width * 0.01),
+          if (i < (gameState.totalLives - gameState.lives) - 1) SizedBox(width: width * 0.01),
         ],
       ],
     );
@@ -93,7 +91,7 @@ class Header extends StatelessWidget {
               ),
               // Count of fish power up
               Text(
-                fish.toString(),
+                gameState.fish.toString(),
                 style: TextStyle(
                   fontSize: M,
                 )
@@ -104,7 +102,7 @@ class Header extends StatelessWidget {
               ),
               // Count of apple power up
               Text(
-                apple.toString(),
+                gameState.apple.toString(),
                 style: TextStyle(
                   fontSize: M,
                 )
@@ -115,7 +113,7 @@ class Header extends StatelessWidget {
               ),
               // Count of banana power up
               Text(
-                banana.toString(),
+                gameState.banana.toString(),
                 style: TextStyle(
                   fontSize: M,
                 )
@@ -134,17 +132,17 @@ class Header extends StatelessWidget {
       child:
       SizedBox(
         width: width * .1,
-        child: Text('\$${NumberFormat('#,###').format(balance)}',
+        child: Text('\$${NumberFormat('#,###').format(gameState.balance)}',
           style: TextStyle(
             fontSize: M,
           ),
-          textAlign:  TextAlign.left,
+          textAlign: TextAlign.left,
         ),
       ),
     );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+      padding: const EdgeInsets.fromLTRB( 10, 10, 10, 10),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[

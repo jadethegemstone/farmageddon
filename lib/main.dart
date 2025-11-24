@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
 import 'layout.dart';
 
@@ -7,6 +9,42 @@ import 'Pages/loan_page.dart';
 import 'Pages/slots_page.dart';
 import 'Pages/plinko_page.dart';
 import 'Pages/blackjack_page.dart';
+
+class GameState extends ChangeNotifier{
+  static final GameState _instance = GameState._internal();
+  factory GameState() => _instance;
+  GameState._internal();
+
+  int _balance = 0;
+  int _lives = 5;
+  int _totalLives = 5;
+  int _fish = 0;
+  int _apple = 0;
+  int _banana = 0;
+
+  int get balance => _balance;
+  int get lives => _lives;
+  int get totalLives => _totalLives;
+  int get fish => _fish;
+  int get apple => _apple;
+  int get banana => _banana;
+
+  void addBalance(int amount) {
+    _balance += amount;
+    notifyListeners();
+  }
+
+  void subtractBalance(int amount) {
+    _balance -= amount;
+    notifyListeners();
+  }
+
+  void subtractLives(int amount) {
+    _lives -= amount;
+    notifyListeners();
+  }
+
+}
 
 // Custom colors
 class theColors {
@@ -47,16 +85,21 @@ class PixelArtImage extends StatelessWidget {
 
 // Routing
 void main() {
-    runApp(MaterialApp(
-      initialRoute: '/',
-      routes: {
-        '/': (context) => AppLayout(child: MainMenu()),
-        '/loan': (context) => AppLayout(child: LoanPage()),
-        '/slots': (context) => AppLayout(child: SlotsPage()),
-        '/plinko': (context) => AppLayout(child: PlinkoPage()),
-        '/blackjack': (context) => AppLayout(child: BlackjackPage()),
-      },
-      debugShowCheckedModeBanner: false,
-      theme: new ThemeData(scaffoldBackgroundColor: theColors.lightPink)
-    ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => GameState(),
+      child: MaterialApp(
+        initialRoute: '/',
+        routes: {
+          '/': (context) => AppLayout(child: MainMenu()),
+          '/loan': (context) => AppLayout(child: LoanPage()),
+          '/slots': (context) => AppLayout(child: SlotsPage()),
+          '/plinko': (context) => AppLayout(child: PlinkoPage()),
+          '/blackjack': (context) => AppLayout(child: BlackjackPage()),
+        },
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(scaffoldBackgroundColor: theColors.lightPink),
+      ),
+    ),
+  );
 }
