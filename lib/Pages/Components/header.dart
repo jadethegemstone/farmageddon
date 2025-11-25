@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
+import 'dart:async';
 
 import '../../main.dart';
 
@@ -12,8 +14,32 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
+  late Timer _timer;
+  int _start = 10;
+
+  void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(oneSec,
+        (Timer timer) {
+          if (_start == 0) {
+            setState(() {
+              timer.cancel();
+            });
+          } else {
+            setState(() {
+              _start--;
+            });
+          }
+        },
+    );
+  }
 
   @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final gameState = context.watch<GameState>();
 
@@ -24,6 +50,25 @@ class _HeaderState extends State<Header> {
     final L = context.fontL;
     final M = context.fontM;
     final S = context.fontS;
+
+    final timerButton = ElevatedButton(
+      onPressed: () {
+        _start = 10;
+        startTimer();
+      }, child: Text("start"),
+    );
+
+    final timerCountdown = TimerCountdown(
+      endTime: DateTime.now().add(
+        const Duration(
+          minutes: 10,
+          seconds: 00,
+        )
+      ),
+      onEnd: () {
+        print("Timer finished");
+      },
+    );
 
     final backButton = ElevatedButton(
       style: ButtonStyle(
@@ -188,7 +233,10 @@ class _HeaderState extends State<Header> {
             SizedBox(width: width * 0.02),
             balanceBox,
             Spacer(),
-            timer,
+            timerCountdown,
+            // timerButton,
+            // Spacer(),
+            // Text("$_start"),
             Spacer(),
             backButton
           ]

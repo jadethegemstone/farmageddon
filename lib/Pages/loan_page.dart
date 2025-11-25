@@ -173,7 +173,7 @@ class loanChoiceButton extends StatelessWidget {
         child: (
             Row (
               children: [
-                Image.asset(imagePath, fit: BoxFit.cover, width: width * 0.1,),
+                Image.asset(imagePath, fit: BoxFit.cover, width: width * 0.08,),
                 Text('\$${NumberFormat('#,###').format(loan)} (Bet ${hearts} heart(s), ${time} minutes to pay back',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
