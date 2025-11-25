@@ -141,6 +141,42 @@ class _HeaderState extends State<Header> {
       ),
     );
 
+    final timer = Visibility (
+        visible: true,
+        child: Positioned(
+          right: width * 0.03,
+          bottom: height * 0.06,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: width * 0.03,
+              vertical: height * 0.01,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black, width: 1),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Time Remaining:',
+                  style: TextStyle(
+                    fontSize: S,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'XX:XX:XX',
+                  style: TextStyle(fontSize: L),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
     return Container(
       padding: const EdgeInsets.fromLTRB( 10, 10, 10, 10),
       child: Row(
@@ -151,6 +187,8 @@ class _HeaderState extends State<Header> {
             powerups,
             SizedBox(width: width * 0.02),
             balanceBox,
+            Spacer(),
+            timer,
             Spacer(),
             backButton
           ]
