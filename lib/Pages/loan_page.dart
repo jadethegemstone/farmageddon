@@ -111,7 +111,7 @@ class _LoanPageState extends State<LoanPage> {
       child: Column (
         children: [
           topRow,
-          loanChoiceButton(loan: 1000, hearts: 1, time: 5, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
+          loanChoiceButton(loan: 1000, hearts: 1, time: 1, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
           Spacer(),
           loanChoiceButton(loan: 3000, hearts: 2, time: 8, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
           Spacer(),
@@ -154,8 +154,19 @@ class loanChoiceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gameState = context.read<GameState>();
     final width = context.screenWidth;
     final S = context.fontS;
+
+    void checkLoan() {
+      if (gameState.balance >= loan) {
+        gameState.subtractBalance(loan);
+      } else {
+        gameState.subtractLives(hearts);
+      }
+    };
+
+
     return ElevatedButton (
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.all(Colors.white),
@@ -186,14 +197,11 @@ class loanChoiceButton extends StatelessWidget {
         ),
       ),
       onPressed: () {
-        final gameState = context.read<GameState>();
         // Add loan to balance if enough hearts and timer isn't already running
         // Add time to timer
         // Subtract hearts from health if timer runs out
-        
-        if (gameState.lives >= hearts) {
-          gameState.addBalance(loan);
-        }
+        gameState.takeLoan(loan, hearts, time);
+        onPressed();
       },
     );
   }

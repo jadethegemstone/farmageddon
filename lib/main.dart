@@ -24,7 +24,13 @@ class GameState extends ChangeNotifier{
   int _fish = 0;
   int _apple = 0;
   int _banana = 0;
+
+  int _currentLoan = 0;
+  int _currentHearts = 0;
+
   DateTime _endTime = DateTime.now();
+  bool _timerRunning = false;
+
 
   int get balance => _balance;
   int get lives => _lives;
@@ -32,7 +38,12 @@ class GameState extends ChangeNotifier{
   int get fish => _fish;
   int get apple => _apple;
   int get banana => _banana;
+
   DateTime get endTime => _endTime;
+  bool get timerRunning => _timerRunning;
+
+  int get currentLoan => _currentLoan;
+  int get currentHearts => _currentHearts;
 
   void addBalance(int amount) {
     _balance += amount;
@@ -49,17 +60,37 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 
+  void takeLoan(int loan, int hearts, int minutes) {
+    if (_lives >= hearts && !_timerRunning) {
+      _balance += loan;
+      _currentLoan = loan;
+      _currentHearts = hearts;
+      addTime(minutes, 0);
+    }
+  }
+
   void addTime(int minutes, int seconds) {
       if (endTime!.isBefore(DateTime.now()) || endTime!.isAtSameMomentAs(DateTime.now())) {
         _endTime = DateTime.now().add(Duration(
           minutes: minutes,
           seconds: seconds,
         ));
+        _timerRunning = true;
       }
       notifyListeners();
   }
   void onTimerEnd() {
-    // Remove hearts
+    _timerRunning = false;
+    // Check if player can pay back the loan
+    if (_balance >= _currentLoan) {
+      _balance -= _currentLoan;
+    } else {
+      _lives -= _currentHearts;
+    }
+    // Reset loan tracking
+    _currentLoan = 0;
+    _currentHearts = 0;
+    notifyListeners();
   }
 }
 

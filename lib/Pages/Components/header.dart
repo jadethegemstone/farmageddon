@@ -27,13 +27,6 @@ class _HeaderState extends State<Header> {
     final M = context.fontM;
     final S = context.fontS;
 
-    final addTimeButton = ElevatedButton(
-      onPressed: () {
-        gameState.addTime(10, 0);
-      },
-      child: Text("Add 10 min"),
-    );
-
     final timerCountdown = Container(
       key: ValueKey(gameState.endTime), // Force rebuild when endTime changes
       child: TimerCountdown(
@@ -174,7 +167,6 @@ class _HeaderState extends State<Header> {
             balanceBox,
             Spacer(),
             timerCountdown,
-            addTimeButton,
             Spacer(),
             backButton
           ]
