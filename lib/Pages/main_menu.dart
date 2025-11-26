@@ -91,9 +91,9 @@ class MainMenu extends StatelessWidget {
     final bottomRow = Container (
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/Images/greg.png'),
-            CircleGameButton(label: 'PLINKO', route: '/plinko', imagePath: 'Assets/Images/greg.png'),
-            CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/homelessAnt.png'),
+            CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/images/slots/alien_cat.jpg'),
+            CircleGameButton(label: 'PLINKO', route: '/plinko', imagePath: 'Assets/images/plinko/computer_horse.jpg'),
+            CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/blackjack/flirting_monkey.jpg'),
             homelessAntImg])
     );
 
@@ -142,6 +142,15 @@ class CircleGameButton extends StatelessWidget {
       child: SizedBox (
         width: width * .13,
         height: width * .13,
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theColors.darkPink,
+              width: width * .003,
+            ),
+          ),
+        child: ClipOval(
         child: (
           Stack (
             alignment: Alignment.center,
@@ -164,6 +173,8 @@ class CircleGameButton extends StatelessWidget {
             ],
           )
         ),
+      ),
+      ),
       ),
       onPressed: () => Navigator.pushNamed(context, route),
     );

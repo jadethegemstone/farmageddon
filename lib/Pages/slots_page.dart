@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import 'dart:math';
 
 class SlotsPage extends StatefulWidget {
   const SlotsPage({Key? key}) : super(key: key);
@@ -28,6 +29,10 @@ class SlotsPage extends StatefulWidget {
     'assets/images/slots/staring_cat.jpg',
     'assets/images/slots/teeth_cat.jpg',
   ];
+  
+  //Rigging
+  final Random _rng = Random();
+  final double riggedWinChance = 0.25;
 
   String randomSlot() {
     slotImages.shuffle();
@@ -91,35 +96,66 @@ class SlotsPage extends StatefulWidget {
           Positioned(
             left: width * 0.07,
             bottom: height * 0.06,
-            child: GestureDetector(
+            child: Consumer<GameState>(
+              builder: (context, gameState, child) {
+                final bool canSpin = gameState.balance >= 100;
+
+                return GestureDetector(
               onTap: () {
+                if (!canSpin) return; // Can't afford, do nothing
+
                 setState(() {
+
+                  gameState.subtractBalance(100);
+                  
                   slot1 = randomSlot();
                   slot2 = randomSlot();
                   slot3 = randomSlot();
+
+                  //Rigging
+                  if (_rng.nextDouble() < riggedWinChance) {
+                    final forced = randomSlot();
+                    slot1 = forced;
+                    slot2 = forced;
+                    slot3 = forced;
+                  }
+
+                  //Reward Wins
+                    if (slot1 == slot2 && slot2 == slot3) {
+                     gameState.addBalance(300); 
+                   }
+        
                 });
-                final gameState = context.read<GameState>();
-                gameState.subtractBalance(100);
               },
+
+              child: Opacity(
+              opacity: canSpin ? 1.0 : 0.5, 
               child: Container(
                 width: width * 0.08,
                 height: width * 0.08,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [Colors.redAccent, Colors.red],
-                  ),
-                  boxShadow: [
+                  gradient: canSpin
+          ? const RadialGradient(
+                          colors: [Colors.redAccent, Colors.red],
+                        )
+                      : const RadialGradient(
+                          colors: [Colors.grey, Colors.grey], 
+                        ),
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       offset: Offset(4, 6),
                       blurRadius: 6,
+                 ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
+        ),
 
           //Time remaining box
           Positioned(
