@@ -36,6 +36,13 @@ class _HeaderState extends State<Header> {
         onEnd: () {
           gameState.onTimerEnd();
         },
+        timeTextStyle: TextStyle(
+          fontSize: M,
+          fontWeight: FontWeight.bold,
+        ),
+        colonsTextStyle: TextStyle(
+          fontSize: M,
+        ),
       ),
     );
 
