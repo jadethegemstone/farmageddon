@@ -14,31 +14,7 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
-  late Timer _timer;
-  int _start = 10;
-
-  void startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(oneSec,
-        (Timer timer) {
-          if (_start == 0) {
-            setState(() {
-              timer.cancel();
-            });
-          } else {
-            setState(() {
-              _start--;
-            });
-          }
-        },
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
+  DateTime? endTime;
 
   Widget build(BuildContext context) {
     final gameState = context.watch<GameState>();
@@ -51,34 +27,34 @@ class _HeaderState extends State<Header> {
     final M = context.fontM;
     final S = context.fontS;
 
-    final timerButton = ElevatedButton(
+    final addTimeButton = ElevatedButton(
       onPressed: () {
-        _start = 10;
-        startTimer();
-      }, child: Text("start"),
+        gameState.addTime(10, 0);
+      },
+      child: Text("Add 10 min"),
     );
 
-    final timerCountdown = TimerCountdown(
-      endTime: DateTime.now().add(
-        const Duration(
-          minutes: 10,
-          seconds: 00,
-        )
+    final timerCountdown = Container(
+      key: ValueKey(gameState.endTime), // Force rebuild when endTime changes
+      child: TimerCountdown(
+        format: CountDownTimerFormat.minutesSeconds,
+        enableDescriptions: false,
+        endTime: gameState.endTime,
+        onEnd: () {
+          gameState.onTimerEnd();
+        },
       ),
-      onEnd: () {
-        print("Timer finished");
-      },
     );
 
     final backButton = ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.white),
-        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-      )
-    )
+          backgroundColor: WidgetStateProperty.all(Colors.white),
+          foregroundColor: WidgetStateProperty.all(theColors.darkPink),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              )
+          )
       ),
       child:
       Align(
@@ -118,12 +94,12 @@ class _HeaderState extends State<Header> {
 
     final powerups =
     Container(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30)
-      ),
-      child:
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30)
+        ),
+        child:
         SizedBox(
           width: width * .3,
           child:
@@ -131,37 +107,37 @@ class _HeaderState extends State<Header> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               SizedBox(
-                width: width * .03,
-                child: PixelArtImage(assetPath: 'Assets/images/fish.png')
+                  width: width * .03,
+                  child: PixelArtImage(assetPath: 'Assets/images/fish.png')
               ),
               // Count of fish power up
               Text(
-                gameState.fish.toString(),
-                style: TextStyle(
-                  fontSize: M,
-                )
+                  gameState.fish.toString(),
+                  style: TextStyle(
+                    fontSize: M,
+                  )
               ),
               SizedBox(
-                width: width * .03,
-                child: PixelArtImage(assetPath: 'Assets/images/apple.png')
+                  width: width * .03,
+                  child: PixelArtImage(assetPath: 'Assets/images/apple.png')
               ),
               // Count of apple power up
               Text(
-                gameState.apple.toString(),
-                style: TextStyle(
-                  fontSize: M,
-                )
+                  gameState.apple.toString(),
+                  style: TextStyle(
+                    fontSize: M,
+                  )
               ),
               SizedBox(
-                width: width * .03,
-                child: PixelArtImage(assetPath: 'Assets/images/banana.png')
+                  width: width * .03,
+                  child: PixelArtImage(assetPath: 'Assets/images/banana.png')
               ),
               // Count of banana power up
               Text(
-                gameState.banana.toString(),
-                style: TextStyle(
-                  fontSize: M,
-                )
+                  gameState.banana.toString(),
+                  style: TextStyle(
+                    fontSize: M,
+                  )
               ),
             ],
           ),
@@ -186,42 +162,6 @@ class _HeaderState extends State<Header> {
       ),
     );
 
-    final timer = Visibility (
-        visible: true,
-        child: Positioned(
-          right: width * 0.03,
-          bottom: height * 0.06,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: width * 0.03,
-              vertical: height * 0.01,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black, width: 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Time Remaining:',
-                  style: TextStyle(
-                    fontSize: S,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'XX:XX:XX',
-                  style: TextStyle(fontSize: L),
-                ),
-              ],
-            ),
-          ),
-        )
-    );
-
     return Container(
       padding: const EdgeInsets.fromLTRB( 10, 10, 10, 10),
       child: Row(
@@ -234,9 +174,7 @@ class _HeaderState extends State<Header> {
             balanceBox,
             Spacer(),
             timerCountdown,
-            // timerButton,
-            // Spacer(),
-            // Text("$_start"),
+            addTimeButton,
             Spacer(),
             backButton
           ]

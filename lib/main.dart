@@ -13,7 +13,10 @@ import 'Pages/blackjack_page.dart';
 class GameState extends ChangeNotifier{
   static final GameState _instance = GameState._internal();
   factory GameState() => _instance;
-  GameState._internal();
+  GameState._internal() {
+    // Initializes timer to 0
+    _endTime = DateTime.now();
+  }
 
   int _balance = 0;
   int _lives = 5;
@@ -21,6 +24,7 @@ class GameState extends ChangeNotifier{
   int _fish = 0;
   int _apple = 0;
   int _banana = 0;
+  DateTime _endTime = DateTime.now();
 
   int get balance => _balance;
   int get lives => _lives;
@@ -28,6 +32,7 @@ class GameState extends ChangeNotifier{
   int get fish => _fish;
   int get apple => _apple;
   int get banana => _banana;
+  DateTime get endTime => _endTime;
 
   void addBalance(int amount) {
     _balance += amount;
@@ -44,6 +49,18 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 
+  void addTime(int minutes, int seconds) {
+      if (endTime!.isBefore(DateTime.now()) || endTime!.isAtSameMomentAs(DateTime.now())) {
+        _endTime = DateTime.now().add(Duration(
+          minutes: minutes,
+          seconds: seconds,
+        ));
+      }
+      notifyListeners();
+  }
+  void onTimerEnd() {
+    // Remove hearts
+  }
 }
 
 // Custom colors
