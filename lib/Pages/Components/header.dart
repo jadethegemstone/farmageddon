@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
-import 'dart:async';
 
 import '../../main.dart';
 
@@ -27,6 +26,12 @@ class _HeaderState extends State<Header> {
     final M = context.fontM;
     final S = context.fontS;
 
+    void checkGameOver() {
+      if (gameState.lives <= 0) {
+        Navigator.pushNamed(context, '/lose');
+      }
+    }
+
     final timerCountdown = Container(
       key: ValueKey(gameState.endTime), // Force rebuild when endTime changes
       child: TimerCountdown(
@@ -35,6 +40,7 @@ class _HeaderState extends State<Header> {
         endTime: gameState.endTime,
         onEnd: () {
           gameState.onTimerEnd();
+          checkGameOver();
         },
         timeTextStyle: TextStyle(
           fontSize: M,

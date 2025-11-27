@@ -65,6 +65,7 @@ class _LoanPageState extends State<LoanPage> {
       onPressed: () {
         if (gameState.balance >= 1000000) {
           gameState.subtractBalance(1000000);
+          Navigator.pushNamed(context, '/win');
         }
       },
     );
@@ -141,7 +142,7 @@ class _LoanPageState extends State<LoanPage> {
       child: Column (
         children: [
           topRow,
-          loanChoiceButton(loan: 1000, hearts: 1, time: 5, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
+          loanChoiceButton(loan: 1000, hearts: 1, time: 1, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
           Spacer(),
           loanChoiceButton(loan: 3000, hearts: 2, time: 8, imagePath: 'Assets/Images/greg.png', onPressed: () => setState(() {}),),
           Spacer(),

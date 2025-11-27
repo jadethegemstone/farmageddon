@@ -10,6 +10,9 @@ import 'Pages/slots_page.dart';
 import 'Pages/plinko_page.dart';
 import 'Pages/blackjack_page.dart';
 
+import 'Pages/Components/win.dart';
+import 'Pages/Components/lose.dart';
+
 class GameState extends ChangeNotifier{
   static final GameState _instance = GameState._internal();
   factory GameState() => _instance;
@@ -18,8 +21,8 @@ class GameState extends ChangeNotifier{
     _endTime = DateTime.now();
   }
 
-  int _balance = 1000000;
-  int _lives = 5;
+  int _balance = 0;
+  int _lives = 1;
   int _totalLives = 5;
   int _fish = 0;
   int _apple = 0;
@@ -55,8 +58,23 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 
+  void addLives(int amount) {
+    _lives += amount;
+    notifyListeners();
+  }
+
   void subtractLives(int amount) {
     _lives -= amount;
+    notifyListeners();
+  }
+
+  void restartGame() {
+    _balance = 5000;
+    _lives = 5;
+    _currentHearts = 0;
+    _currentLoan = 0;
+    _endTime = DateTime.now();
+    _timerRunning = false;
     notifyListeners();
   }
 
@@ -93,6 +111,8 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 }
+
+
 
 // Custom colors
 class theColors {
@@ -144,6 +164,8 @@ void main() {
           '/slots': (context) => AppLayout(child: SlotsPage()),
           '/plinko': (context) => AppLayout(child: PlinkoPage()),
           '/blackjack': (context) => AppLayout(child: BlackjackPage()),
+          '/win' : (context) => Win(),
+          '/lose' : (context) => Lose(),
         },
         debugShowCheckedModeBanner: false,
         theme: ThemeData(scaffoldBackgroundColor: theColors.lightPink),
