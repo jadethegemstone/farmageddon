@@ -45,19 +45,49 @@ class _LoanPageState extends State<LoanPage> {
       child: Image.asset('Assets/images/gregDialogueLoanPage.png', fit: BoxFit.cover, alignment: Alignment.topCenter)
     );
 
-    final rightCol = Align( alignment: Alignment.bottomCenter,
-      child: Stack(
-        children: [
-          impactStar,
-          gregImage,
-          Text('GREG', style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: XL,
-              color: Colors.white,
-            )
+    final payDebtButton =
+    ElevatedButton(
+      style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.white),
+          foregroundColor: WidgetStateProperty.all(theColors.darkPink),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              )
           )
+      ),
+      child: Text('Pay your debts (1,000,000)',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: L,
+          )
+      ),
+      onPressed: () {
+        if (gameState.balance >= 1000000) {
+          gameState.subtractBalance(1000000);
+        }
+      },
+    );
+
+    final rightCol = Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Spacer(),
+          payDebtButton,
+          Spacer(),
+          Stack(
+            children: [
+              impactStar,
+              gregImage,
+              Text('GREG', style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: XL,
+                color: Colors.white,
+                )
+              )
+            ],
+          ),
         ],
-      )
     );
 
     final topRow = SizedBox (
