@@ -32,7 +32,8 @@ class SlotsPage extends StatefulWidget {
   
   //Rigging
   final Random _rng = Random();
-  final double riggedWinChance = 0.25;
+  final double riggedWinChance3 = 0.05;
+  final double riggedWinChance2 = 0.15;
 
   String randomSlot() {
     slotImages.shuffle();
@@ -113,18 +114,40 @@ class SlotsPage extends StatefulWidget {
                   slot3 = randomSlot();
 
                   //Rigging
-                  if (_rng.nextDouble() < riggedWinChance) {
+                  //3 slots
+                  if (_rng.nextDouble() < riggedWinChance3) {
                     final forced = randomSlot();
                     slot1 = forced;
                     slot2 = forced;
                     slot3 = forced;
                   }
+                  //2 slots
+                  if (_rng.nextDouble() < riggedWinChance2 && _rng.nextDouble() > riggedWinChance3) {
+                    final random = Random().nextInt(2);
+                    final forced = randomSlot();
+                    switch (random) {
+                      case 0:
+                        slot1 = randomSlot();
+                        slot2 = forced;
+                        slot3 = forced;
+                      case 1:
+                        slot1 = forced;
+                        slot2 = forced;
+                        slot3 = randomSlot();
+                      case 2:
+                        slot1 = forced;
+                        slot2 = randomSlot();
+                        slot3 = forced;
+                    }
+                  }
 
                   //Reward Wins
-                    if (slot1 == slot2 && slot2 == slot3) {
-                     gameState.addBalance(300); 
-                   }
-        
+                  if (slot1 == slot2 && slot2 == slot3) {
+                    gameState.balance * 2;
+                  }
+                  if (slot1 == slot2 || slot2 == slot3 || slot1 == slot3) {
+                    gameState.addBalance(250);
+                  }
                 });
               },
 
@@ -135,19 +158,17 @@ class SlotsPage extends StatefulWidget {
                 height: width * 0.08,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: canSpin
-          ? const RadialGradient(
+                  gradient: canSpin ? const RadialGradient(
                           colors: [Colors.redAccent, Colors.red],
-                        )
-                      : const RadialGradient(
+                  ) : const RadialGradient(
                           colors: [Colors.grey, Colors.grey], 
-                        ),
+                      ),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       offset: Offset(4, 6),
                       blurRadius: 6,
-                 ),
+                    ),
                       ],
                     ),
                   ),
@@ -156,40 +177,6 @@ class SlotsPage extends StatefulWidget {
             },
           ),
         ),
-
-          //Time remaining box
-          Positioned(
-            right: width * 0.03,
-            bottom: height * 0.06,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.03,
-                vertical: height * 0.01,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black, width: 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Time Remaining:',
-                    style: TextStyle(
-                      fontSize: S,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'XX:XX:XX',
-                    style: TextStyle(fontSize: L),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
