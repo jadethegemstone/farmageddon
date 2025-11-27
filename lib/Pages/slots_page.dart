@@ -1,219 +1,416 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../main.dart';
-import 'dart:math';
+  import 'package:flutter/material.dart';
+  import 'package:provider/provider.dart';
+  import 'package:confetti/confetti.dart';
+  import '../main.dart';
+  import 'dart:math';
 
-class SlotsPage extends StatefulWidget {
-  const SlotsPage({Key? key}) : super(key: key);
+  class SlotsPage extends StatefulWidget {
+    const SlotsPage({Key? key}) : super(key: key);
 
-  @override
-  _SlotsPageState createState() => _SlotsPageState();
-}
-  class _SlotsPageState extends State<SlotsPage> {
-
-  //SLOT IMAGES
-  final List<String> slotImages = [
-    'assets/images/slots/alien_cat.jpg',
-    'assets/images/slots/bruh_cat.jpg',
-    'assets/images/slots/crying_cat.jpg',
-    'assets/images/slots/elcato.jpg',
-    'assets/images/slots/goofy_ass_cat.jpg',
-    'assets/images/slots/human_cat.jpg',
-    'assets/images/slots/loser_cat.jpg',
-    'assets/images/slots/milk_cat.jpg',
-    'assets/images/slots/scared_cat.png',
-    'assets/images/slots/sideeye_cat.jpg',
-    'assets/images/slots/singing_cat.jpg',
-    'assets/images/slots/smirk_cat.jpg',
-    'assets/images/slots/soldier_cat.jpg',
-    'assets/images/slots/staring_cat.jpg',
-    'assets/images/slots/teeth_cat.jpg',
-  ];
-  
-  //Rigging
-  final Random _rng = Random();
-  final double riggedWinChance3 = 0.05;
-  final double riggedWinChance2 = 0.15;
-
-  String randomSlot() {
-    slotImages.shuffle();
-    return slotImages.first;
+    @override
+    _SlotsPageState createState() => _SlotsPageState();
   }
+    class _SlotsPageState extends State<SlotsPage> with SingleTickerProviderStateMixin {
 
-  late String slot1;
-  late String slot2;
-  late String slot3;
+    //SLOT IMAGES
+    final List<String> slotImages = [
+      'assets/images/slots/alien_cat.jpg',
+      'assets/images/slots/bruh_cat.jpg',
+      'assets/images/slots/crying_cat.jpg',
+      'assets/images/slots/elcato.jpg',
+      'assets/images/slots/goofy_ass_cat.jpg',
+      'assets/images/slots/human_cat.jpg',
+      'assets/images/slots/loser_cat.jpg',
+      'assets/images/slots/milk_cat.jpg',
+      'assets/images/slots/scared_cat.png',
+      'assets/images/slots/sideeye_cat.jpg',
+      'assets/images/slots/singing_cat.jpg',
+      'assets/images/slots/smirk_cat.jpg',
+      'assets/images/slots/soldier_cat.jpg',
+      'assets/images/slots/staring_cat.jpg',
+      'assets/images/slots/teeth_cat.jpg',
+    ];
+    
+    //Rigging
+    final Random _rng = Random();
+    final double riggedWinChance3 = 0.05;
+    final double riggedWinChance2 = 0.15;
 
-  @override
-  void initState() {
-    super.initState();
-    slot1 = randomSlot();
-    slot2 = randomSlot();
-    slot3 = randomSlot();
-  }
+    String randomSlot() {
+      slotImages.shuffle();
+      return slotImages.first;
+    }
 
-   @override
-  Widget build(BuildContext context) {
-    final width = context.screenWidth;
-    final height = context.screenHeight;
-    final L = context.fontL;
-    final S = context.fontS;
+    late String slot1;
+    late String slot2;
+    late String slot3;
 
-    //Machine image 
-    final machineWidth = width * 0.70;
+    //Win State
+    bool _spin1 = false;
+    bool _spin2 = false;
+    bool _spin3 = false;
+    bool _isWinning = false;
+    bool _showWinGif = false;
 
-    return Scaffold(
-      backgroundColor: theColors.lightPink,
-      body: Stack(
-        children: [
-          //Slot Machine Background
-          Align(
-            alignment: const Alignment(0.1, -0.45),
-            child: Image.asset(
-              'assets/images/slots/slot_machine.png',
-              width: machineWidth,
-              fit: BoxFit.contain,
-            ),
-          ),
+    // Confetti
+    late ConfettiController _confettiController;
 
-          //3 cat window
-          Align(
-            alignment: const Alignment(-0.15, 0),
-            child: SizedBox(
-              width: machineWidth * 0.80,       
-              height: machineWidth * 0.40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _SlotWindow(imagePath: slot1, machineWidth: machineWidth),
-                  _SlotWindow(imagePath: slot2, machineWidth: machineWidth),
-                  _SlotWindow(imagePath: slot3, machineWidth: machineWidth),
-                ],
+    //Screen Shake
+    late AnimationController _shakeController;
+
+    @override
+    void initState() {
+      super.initState();
+      slot1 = randomSlot();
+      slot2 = randomSlot();
+      slot3 = randomSlot();
+
+      _confettiController =
+          ConfettiController(duration: const Duration(seconds: 2));
+
+      _shakeController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 500),
+      );
+
+       _shakeController.addListener(() {
+      if (mounted) {
+        setState(() {});   
+      }
+    });
+    }
+
+    
+
+    @override
+    void dispose() {
+      _confettiController.dispose();
+      _shakeController.dispose();
+      super.dispose();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      final width = context.screenWidth;
+      final height = context.screenHeight;
+      final L = context.fontL;
+      final S = context.fontS;
+
+      //Shake animation
+      final double shakeValue = _shakeController.isAnimating ? _shakeController.value : 0.0;
+      final double shakeOffset = 10 * sin(shakeValue * pi * 10);
+
+      //Machine image 
+      final machineWidth = width * 0.70;
+
+      return Scaffold(
+        backgroundColor: theColors.lightPink,
+        body: Transform.translate(
+        offset: Offset(shakeOffset, 0),   // screen shaking
+        child: Stack(
+          children: [
+            //Slot Machine Background
+            Align(
+              alignment: const Alignment(0.1, -0.45),
+              child: Image.asset(
+                'assets/images/slots/slot_machine.png',
+                width: machineWidth,
+                fit: BoxFit.contain,
               ),
             ),
-          ),
 
-          //SPIN BUTTON
-          Positioned(
-            left: width * 0.07,
-            bottom: height * 0.06,
-            child: Consumer<GameState>(
-              builder: (context, gameState, child) {
-                final bool canSpin = gameState.balance >= 100;
+            //3 cat window
+            Align(
+              alignment: const Alignment(-0.15, 0),
+              child: SizedBox(
+                width: machineWidth * 0.80,       
+                height: machineWidth * 0.40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _SlotWindow(imagePath: slot1, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+                    _SlotWindow(imagePath: slot2, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+                    _SlotWindow(imagePath: slot3, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+                  ],
+                ),
+              ),
+            ),
 
-                return GestureDetector(
-              onTap: () {
-                if (!canSpin) return; // Can't afford, do nothing
+            //SPIN BUTTON
+            Positioned(
+              left: width * 0.07,
+              bottom: height * 0.06,
+              child: Consumer<GameState>(
+                builder: (context, gameState, child) {
+                  final bool canSpin = gameState.balance >= 100;
 
-                setState(() {
+                  return GestureDetector(
+                onTap: () {
+                  if (!canSpin) return; // Can't afford, do nothing
 
-                  gameState.subtractBalance(100);
-                  
-                  slot1 = randomSlot();
-                  slot2 = randomSlot();
-                  slot3 = randomSlot();
+                  setState(() {
 
-                  //Rigging
-                  //3 slots
-                  if (_rng.nextDouble() < riggedWinChance3) {
-                    final forced = randomSlot();
-                    slot1 = forced;
-                    slot2 = forced;
-                    slot3 = forced;
-                  }
-                  //2 slots
-                  if (_rng.nextDouble() < riggedWinChance2 && _rng.nextDouble() > riggedWinChance3) {
-                    final random = Random().nextInt(2);
-                    final forced = randomSlot();
-                    switch (random) {
-                      case 0:
-                        slot1 = randomSlot();
-                        slot2 = forced;
-                        slot3 = forced;
-                      case 1:
-                        slot1 = forced;
-                        slot2 = forced;
-                        slot3 = randomSlot();
-                      case 2:
-                        slot1 = forced;
-                        slot2 = randomSlot();
-                        slot3 = forced;
+                    //Spinning animation 
+                    _spin1 = true;
+                    _spin2 = true;
+                    _spin3 = true;
+
+                    // Stop slot
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (!mounted) return;
+                      setState(() => _spin1 = false);
+                    });
+
+                    // Stop slot 2
+                    Future.delayed(const Duration(milliseconds: 650), () {
+                      if (!mounted) return;
+                      setState(() => _spin2 = false);
+                    });
+
+                    // Stop slot 3 
+                    Future.delayed(const Duration(milliseconds: 800), () {
+                      if (!mounted) return;
+                      setState(() => _spin3 = false);
+                    });
+
+                    gameState.subtractBalance(100);
+                    
+                    slot1 = randomSlot();
+                    slot2 = randomSlot();
+                    slot3 = randomSlot();
+
+                    //Rigging
+                    final roll = _rng.nextDouble();
+
+                    //3 slots
+                    if ( roll < riggedWinChance3) {
+                      final forced = randomSlot();
+                      slot1 = forced;
+                      slot2 = forced;
+                      slot3 = forced;
                     }
-                  }
+                    //2 slots
+                    else if ( roll < riggedWinChance3 + riggedWinChance2) {
+                      final forced = randomSlot();
+                      final patternIndex = Random().nextInt(3);
 
-                  //Reward Wins
-                  if (slot1 == slot2 && slot2 == slot3) {
-                    gameState.balance * 2;
-                  }
-                  if (slot1 == slot2 || slot2 == slot3 || slot1 == slot3) {
-                    gameState.addBalance(250);
-                  }
-                });
-              },
+                      switch (patternIndex) {
+                        case 0:
+                          slot1 = randomSlot();
+                          slot2 = forced;
+                          slot3 = forced;
+                          break;
+                        case 1:
+                          slot1 = forced;
+                          slot2 = forced;
+                          slot3 = randomSlot();
+                          break;
+                        case 2:
+                          slot1 = forced;
+                          slot2 = randomSlot();
+                          slot3 = forced;
+                          break;
+                      }
+                    }
 
-              child: Opacity(
-              opacity: canSpin ? 1.0 : 0.5, 
-              child: Container(
-                width: width * 0.08,
-                height: width * 0.08,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: canSpin ? const RadialGradient(
-                          colors: [Colors.redAccent, Colors.red],
-                  ) : const RadialGradient(
-                          colors: [Colors.grey, Colors.grey], 
+                    //Reward Wins
+                    // Reset win flags by default
+                    _isWinning = false;
+                    _showWinGif = false;
+
+                    // Check matches
+                    final threeMatch = (slot1 == slot2 && slot2 == slot3);
+                    final twoMatch = (!threeMatch) &&
+                        (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
+
+                    if (threeMatch) {
+                      // Big win payout
+                      gameState.addBalance(300);
+
+                      // Trigger win effects
+                      _isWinning = true;
+                      _showWinGif = true;
+                      _confettiController.play();
+                      _shakeController.forward(from: 0);
+
+                      // Turn off animations after 2 seconds
+                      Future.delayed(const Duration(seconds: 5), () {
+                        if (!mounted) return;
+                        setState(() {
+                          _isWinning = false;
+                          _showWinGif = false;
+                        });
+                      });
+                    } else if (twoMatch) {
+                      // Smaller win
+                      gameState.addBalance(250);
+                    }
+                  });
+                },
+                child: Opacity(
+                opacity: canSpin ? 1.0 : 0.5, 
+                child: Container(
+                  width: width * 0.08,
+                  height: width * 0.08,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: canSpin ? const RadialGradient(
+                            colors: [Colors.redAccent, Colors.red],
+                    ) : const RadialGradient(
+                            colors: [Colors.grey, Colors.grey], 
+                        ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        offset: Offset(4, 6),
+                        blurRadius: 6,
                       ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(4, 6),
-                      blurRadius: 6,
-                    ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
+                );
+              },
+            ),
+          ),
+
+          // Confetti burst when winning
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                emissionFrequency: 0.9,
+                numberOfParticles: 40,
+                maxBlastForce: 80,
+                minBlastForce: 30,
+                gravity: 0.1,
+              ),
+            ),
+
+            // Dancing cat GIF
+            if (_showWinGif)
+            Stack(
+              children: [
+                // Big center cat
+                Center(
+                  child: Image.asset(
+                    'Assets/images/slots/dancing-cat.gif',
+                    width: width * 0.6,     // huge
+                  ),
                 ),
-              );
-            },
+
+                // Smaller cat top-left
+                Positioned(
+                  left: width * 0.05,
+                  top: height * 0.15,
+                  child: Image.asset(
+                    'Assets/images/slots/dancing-cat.gif',
+                    width: width * 0.3,
+                  ),
+                ),
+
+                // Smaller cat top-right
+                Positioned(
+                  right: width * 0.05,
+                  top: height * 0.2,
+                  child: Image.asset(
+                    'Assets/images/slots/dancing-cat.gif',
+                    width: width * 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        ),
+      );
+    }
+  }
+
+  //Slot Window
+  class _SlotWindow extends StatelessWidget {
+    final String imagePath;
+    final double machineWidth;
+    final bool isWinning;
+    final bool isSpinning;
+
+    const _SlotWindow ({
+      required this.imagePath,
+      required this.machineWidth,
+      required this.isWinning,
+      required this.isSpinning,
+    });
+
+    @override
+    Widget build(BuildContext context) {
+      // size of each window 
+      final windowWidth = machineWidth * 0.22;
+      final windowHeight = machineWidth * 0.32;
+
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: windowWidth,
+        height: windowHeight,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isWinning ? theColors.darkPink : Colors.black,
+            width: isWinning ? 6 : 4,
+          ),
+          boxShadow: isWinning
+              ? [
+                  BoxShadow(
+                    color: theColors.darkPink.withOpacity(0.6),
+                    blurRadius: 20,
+                    spreadRadius: 3,
+                  ),
+                ]
+              : const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    offset: Offset(3, 5),
+                  ),
+                ],
+        ),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 250),
+          scale: isWinning ? 1.05 : 1.0,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: Tween<double>(begin: 1.5, end: 1).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                  ),
+                  child: child,
+                );
+              },
+              child: isSpinning
+                  ? Transform.scale(
+                      scale: 1.8,
+                      child: Opacity(
+                        opacity: 0.3,
+                        child: Image.asset(
+                          imagePath,
+                          key: ValueKey("spin-$imagePath"),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      imagePath,
+                      key: ValueKey(imagePath),
+                      fit: BoxFit.cover,
+                    ),
+            ),
           ),
         ),
-        ],
-      ),
-    );
+      );
+    }
   }
-}
-
-//Slot Window
-class _SlotWindow extends StatelessWidget {
-  final String imagePath;
-  final double machineWidth;
-
-  const _SlotWindow({
-    required this.imagePath,
-    required this.machineWidth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // size of each window 
-    final windowWidth = machineWidth * 0.22;
-    final windowHeight = machineWidth * 0.32;
-
-    return Container(
-      width: windowWidth,
-      height: windowHeight,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black, width: 4),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20), 
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-}
