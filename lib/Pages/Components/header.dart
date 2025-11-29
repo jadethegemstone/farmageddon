@@ -150,26 +150,49 @@ class _HeaderState extends State<Header> {
         )
     );
 
-    final balanceBox = Container(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30)
-      ),
-      child:
-      SizedBox(
-        width: width * .1,
-        child: Text('\$${NumberFormat('#,###').format(gameState.balance)}',
-          style: TextStyle(
-            fontSize: M,
+    final balanceBox =
+    Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30)
           ),
-          textAlign: TextAlign.left,
+          child:
+          SizedBox(
+            width: width * .1,
+            child: Text('\$${NumberFormat('#,###').format(gameState.balance)}',
+              style: TextStyle(
+                fontSize: M,
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
         ),
-      ),
+        // pop up win amount
+        Positioned(
+          top: height * 0.06, // Adjust this value to position below the box
+          child: gameState.lastWinAmount > 0
+              ? AnimatedOpacity(
+            opacity: gameState.showPopup ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: Text(
+              '+\$${NumberFormat('#,###').format(gameState.lastWinAmount)}',
+              style: TextStyle(
+                fontSize: M,
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ) : SizedBox.shrink(), // Empty widget when condition is false
+        ),
+      ],
     );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB( 10, 10, 10, 10),
+      padding: const EdgeInsets.fromLTRB( 10, 10, 10, 50),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[

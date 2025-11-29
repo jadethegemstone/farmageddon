@@ -34,6 +34,9 @@ class GameState extends ChangeNotifier{
   DateTime _endTime = DateTime.now();
   bool _timerRunning = false;
 
+  bool _showPopup = false;
+  int _lastWinAmount = 0;
+  int _lastLossAmount = 0;
 
   int get balance => _balance;
   int get lives => _lives;
@@ -48,6 +51,11 @@ class GameState extends ChangeNotifier{
   int get currentLoan => _currentLoan;
   int get currentHearts => _currentHearts;
 
+  bool get showPopup => _showPopup;
+  int get lastWinAmount => _lastWinAmount;
+  int get lastLossAmount => _lastLossAmount;
+
+
   void addBalance(int amount) {
     _balance += amount;
     notifyListeners();
@@ -56,6 +64,30 @@ class GameState extends ChangeNotifier{
   void subtractBalance(int amount) {
     _balance -= amount;
     notifyListeners();
+  }
+
+  void showWinAmount(int amount) {
+    _showPopup = true;
+    _lastWinAmount = amount;
+    notifyListeners();
+
+    Future.delayed(Duration(milliseconds: 300), () {
+      _showPopup = false;
+      _lastWinAmount = 0;
+      notifyListeners();
+    });
+  }
+
+  void showLossAmount(int amount) {
+    _showPopup = true;
+    _lastLossAmount = amount;
+    notifyListeners();
+
+    Future.delayed(Duration(milliseconds: 300), () {
+      _showPopup = false;
+      _lastLossAmount = 0;
+      notifyListeners();
+    });
   }
 
   void addLives(int amount) {
@@ -111,8 +143,6 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 }
-
-
 
 // Custom colors
 class theColors {

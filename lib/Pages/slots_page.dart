@@ -1,5 +1,6 @@
-  import 'package:flutter/material.dart';
-  import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
   import 'package:confetti/confetti.dart';
   import '../main.dart';
   import 'dart:math';
@@ -80,8 +81,6 @@
     });
     }
 
-    
-
     @override
     void dispose() {
       _confettiController.dispose();
@@ -91,10 +90,15 @@
 
     @override
     Widget build(BuildContext context) {
-      final width = context.screenWidth;
-      final height = context.screenHeight;
-      final L = context.fontL;
-      final S = context.fontS;
+    final gameState = context.watch<GameState>();
+
+    final width = context.screenWidth;
+    final height = context.screenHeight;
+    final XXL = context.fontXXL;
+    final XL = context.fontXL;
+    final L = context.fontL;
+    final M = context.fontM;
+    final S = context.fontS;
 
       //Shake animation
       final double shakeValue = _shakeController.isAnimating ? _shakeController.value : 0.0;
@@ -102,6 +106,49 @@
 
       //Machine image 
       final machineWidth = width * 0.70;
+      
+      final int gameCost = 100;
+      int moneyWon = 0;
+
+      final slotMachineBackground = Align(
+        alignment: const Alignment(0.1, -0.45),
+        child: Image.asset(
+          'assets/images/slots/slot_machine.png',
+          width: machineWidth,
+          fit: BoxFit.contain,
+        ),
+      );
+
+      final threeCatWindow = Align(
+        alignment: const Alignment(-0.15, 0),
+        child: SizedBox(
+          width: machineWidth * 0.80,
+          height: machineWidth * 0.40,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _SlotWindow(imagePath: slot1, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+              _SlotWindow(imagePath: slot2, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+              _SlotWindow(imagePath: slot3, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+            ],
+          ),
+        ),
+      );
+
+      final confetti = Align(
+        alignment: Alignment.topCenter,
+        child: ConfettiWidget(
+          confettiController: _confettiController,
+          blastDirectionality: BlastDirectionality.explosive,
+          shouldLoop: false,
+          emissionFrequency: 0.9,
+          numberOfParticles: 40,
+          maxBlastForce: 80,
+          minBlastForce: 30,
+          gravity: 0.1,
+        ),
+      );
+
 
       return Scaffold(
         backgroundColor: theColors.lightPink,
@@ -109,34 +156,10 @@
         offset: Offset(shakeOffset, 0),   // screen shaking
         child: Stack(
           children: [
-            //Slot Machine Background
-            Align(
-              alignment: const Alignment(0.1, -0.45),
-              child: Image.asset(
-                'assets/images/slots/slot_machine.png',
-                width: machineWidth,
-                fit: BoxFit.contain,
-              ),
-            ),
+            slotMachineBackground,
+            threeCatWindow,
 
-            //3 cat window
-            Align(
-              alignment: const Alignment(-0.15, 0),
-              child: SizedBox(
-                width: machineWidth * 0.80,       
-                height: machineWidth * 0.40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _SlotWindow(imagePath: slot1, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
-                    _SlotWindow(imagePath: slot2, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
-                    _SlotWindow(imagePath: slot3, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
-                  ],
-                ),
-              ),
-            ),
-
-            //SPIN BUTTON
+            //SPIN BUTTON with cost popup
             Positioned(
               left: width * 0.07,
               bottom: height * 0.06,
@@ -145,150 +168,160 @@
                   final bool canSpin = gameState.balance >= 100;
 
                   return GestureDetector(
-                onTap: () {
-                  if (!canSpin) return; // Can't afford, do nothing
+                    onTap: () {
+                      if (!canSpin) return; // Can't afford, do nothing
 
-                  setState(() {
+                      setState(() {
+                        //Spinning animation
+                        _spin1 = true;
+                        _spin2 = true;
+                        _spin3 = true;
 
-                    //Spinning animation 
-                    _spin1 = true;
-                    _spin2 = true;
-                    _spin3 = true;
-
-                    // Stop slot
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      if (!mounted) return;
-                      setState(() => _spin1 = false);
-                    });
-
-                    // Stop slot 2
-                    Future.delayed(const Duration(milliseconds: 650), () {
-                      if (!mounted) return;
-                      setState(() => _spin2 = false);
-                    });
-
-                    // Stop slot 3 
-                    Future.delayed(const Duration(milliseconds: 800), () {
-                      if (!mounted) return;
-                      setState(() => _spin3 = false);
-                    });
-
-                    gameState.subtractBalance(100);
-                    
-                    slot1 = randomSlot();
-                    slot2 = randomSlot();
-                    slot3 = randomSlot();
-
-                    //Rigging
-                    final roll = _rng.nextDouble();
-
-                    //3 slots
-                    if ( roll < riggedWinChance3) {
-                      final forced = randomSlot();
-                      slot1 = forced;
-                      slot2 = forced;
-                      slot3 = forced;
-                    }
-                    //2 slots
-                    else if ( roll < riggedWinChance3 + riggedWinChance2) {
-                      final forced = randomSlot();
-                      final patternIndex = Random().nextInt(3);
-
-                      switch (patternIndex) {
-                        case 0:
-                          slot1 = randomSlot();
-                          slot2 = forced;
-                          slot3 = forced;
-                          break;
-                        case 1:
-                          slot1 = forced;
-                          slot2 = forced;
-                          slot3 = randomSlot();
-                          break;
-                        case 2:
-                          slot1 = forced;
-                          slot2 = randomSlot();
-                          slot3 = forced;
-                          break;
-                      }
-                    }
-
-                    //Reward Wins
-                    // Reset win flags by default
-                    _isWinning = false;
-                    _showWinGif = false;
-
-                    // Check matches
-                    final threeMatch = (slot1 == slot2 && slot2 == slot3);
-                    final twoMatch = (!threeMatch) &&
-                        (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
-
-                    if (threeMatch) {
-                      // Big win payout
-                      gameState.addBalance(300);
-
-                      // Trigger win effects
-                      _isWinning = true;
-                      _showWinGif = true;
-                      _confettiController.play();
-                      _shakeController.forward(from: 0);
-
-                      // Turn off animations after 2 seconds
-                      Future.delayed(const Duration(seconds: 5), () {
-                        if (!mounted) return;
-                        setState(() {
-                          _isWinning = false;
-                          _showWinGif = false;
+                        // Stop slot
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (!mounted) return;
+                          setState(() => _spin1 = false);
                         });
-                      });
-                    } else if (twoMatch) {
-                      // Smaller win
-                      gameState.addBalance(250);
-                    }
-                  });
-                },
-                child: Opacity(
-                opacity: canSpin ? 1.0 : 0.5, 
-                child: Container(
-                  width: width * 0.08,
-                  height: width * 0.08,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: canSpin ? const RadialGradient(
-                            colors: [Colors.redAccent, Colors.red],
-                    ) : const RadialGradient(
-                            colors: [Colors.grey, Colors.grey], 
-                        ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        offset: Offset(4, 6),
-                        blurRadius: 6,
-                      ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
 
-          // Confetti burst when winning
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirectionality: BlastDirectionality.explosive,
-                shouldLoop: false,
-                emissionFrequency: 0.9,
-                numberOfParticles: 40,
-                maxBlastForce: 80,
-                minBlastForce: 30,
-                gravity: 0.1,
+                        // Stop slot 2
+                        Future.delayed(const Duration(milliseconds: 650), () {
+                          if (!mounted) return;
+                          setState(() => _spin2 = false);
+                        });
+
+                        // Stop slot 3
+                        Future.delayed(const Duration(milliseconds: 800), () {
+                          if (!mounted) return;
+                          setState(() => _spin3 = false);
+                        });
+
+                        gameState.subtractBalance(gameCost);
+                        gameState.showLossAmount(gameCost);
+
+                        slot1 = randomSlot();
+                        slot2 = randomSlot();
+                        slot3 = randomSlot();
+
+                        //Rigging
+                        final roll = _rng.nextDouble();
+
+                        //3 slots
+                        if (roll < riggedWinChance3) {
+                          final forced = randomSlot();
+                          slot1 = forced;
+                          slot2 = forced;
+                          slot3 = forced;
+                        }
+                        //2 slots
+                        else if (roll < riggedWinChance3 + riggedWinChance2) {
+                          final forced = randomSlot();
+                          final patternIndex = Random().nextInt(3);
+
+                          switch (patternIndex) {
+                            case 0:
+                              slot1 = randomSlot();
+                              slot2 = forced;
+                              slot3 = forced;
+                              break;
+                            case 1:
+                              slot1 = forced;
+                              slot2 = forced;
+                              slot3 = randomSlot();
+                              break;
+                            case 2:
+                              slot1 = forced;
+                              slot2 = randomSlot();
+                              slot3 = forced;
+                              break;
+                          }
+                        }
+
+                        //Reward Wins
+                        // Reset win flags by default
+                        _isWinning = false;
+                        _showWinGif = false;
+
+                        // Check matches
+                        final threeMatch = (slot1 == slot2 && slot2 == slot3);
+                        final twoMatch = (!threeMatch) &&
+                            (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
+
+                        if (threeMatch) {
+                          // Big win payout
+                          moneyWon = 500;
+
+                          // Trigger win effects
+                          _isWinning = true;
+                          _showWinGif = true;
+                          _confettiController.play();
+                          _shakeController.forward(from: 0);
+
+                          // Turn off animations after 2 seconds
+                          Future.delayed(const Duration(seconds: 5), () {
+                            if (!mounted) return;
+                            setState(() {
+                              _isWinning = false;
+                              _showWinGif = false;
+                            });
+                          });
+                        } else if (twoMatch) {
+                          // Smaller win
+                          moneyWon = 150;
+                        }
+                        gameState.addBalance(moneyWon);
+                        gameState.showWinAmount(moneyWon);
+                      });
+                    },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Opacity(
+                          opacity: canSpin ? 1.0 : 0.5,
+                          child: Container(
+                            width: width * 0.06,
+                            height: width * 0.06,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: canSpin
+                                  ? const RadialGradient(
+                                colors: [Colors.redAccent, Colors.red],
+                              )
+                                  : const RadialGradient(
+                                colors: [Colors.grey, Colors.grey],
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  offset: Offset(4, 6),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: width * 0.02), // Space between button and text
+                        // Cost popup
+                        if (gameState.lastLossAmount > 0)
+                          AnimatedOpacity(
+                            opacity: gameState.showPopup ? 1.0 : 0.0,
+                            duration: Duration(milliseconds: 300),
+                            child: Text(
+                              '-\$${NumberFormat('#,###').format(gameState.lastLossAmount)}',
+                              style: TextStyle(
+                                fontSize: M,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
 
+          confetti,
             // Dancing cat GIF
             if (_showWinGif)
             Stack(
