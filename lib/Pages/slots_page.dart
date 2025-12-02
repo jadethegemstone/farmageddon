@@ -397,7 +397,7 @@ import 'package:provider/provider.dart';
               ],
             ),
 
-          // WINNER + STREAK box (bottom-right)
+          // WINNER + STREAK box
           Positioned(
             right: width * 0.04,
             bottom: height * 0.04,
