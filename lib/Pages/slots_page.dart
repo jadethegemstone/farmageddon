@@ -54,6 +54,10 @@ import 'package:provider/provider.dart';
     bool _isWinning = false;
     bool _showWinGif = false;
 
+    // Win & streak display
+    bool _showWinnerBanner = false;
+    int _winStreak = 0;
+
     // Confetti
     late ConfettiController _confettiController;
 
@@ -196,9 +200,27 @@ import 'package:provider/provider.dart';
         moneyWon = 150;
       }
 
+       // --- WIN STREAK LOGIC ---
       if (moneyWon > 0) {
+        //Increase streak
+        _winStreak++;
+
+        //Winner Banner
+        _showWinnerBanner = true;
+
         gameState.addBalance(moneyWon);
         gameState.showWinAmount(moneyWon);
+
+        Future.delayed(const Duration(seconds: 3), () {
+          if (!mounted) return;
+          setState(() {
+            _showWinnerBanner = false;
+          });
+        });
+      } else {
+        // Lost -> reset streak and hide banner
+        _winStreak = 0;
+        _showWinnerBanner = false;
       }
     });
   }
@@ -374,6 +396,61 @@ import 'package:provider/provider.dart';
                 ),
               ],
             ),
+
+          // WINNER + STREAK box (bottom-right)
+          Positioned(
+            right: width * 0.04,
+            bottom: height * 0.04,
+            child: AnimatedOpacity(
+              opacity: _showWinnerBanner ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.03,
+                  vertical: height * 0.01,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: theColors.darkPink,
+                    width: 3,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(3, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'WINNER',
+                      style: TextStyle(
+                        fontSize: M,
+                        fontWeight: FontWeight.bold,
+                        color: theColors.darkPink,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    if (_winStreak > 1)
+                      Text(
+                        'STREAK x$_winStreak',
+                        style: TextStyle(
+                          fontSize: S,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           ],
         ),
         ),
