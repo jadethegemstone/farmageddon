@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
   import 'package:confetti/confetti.dart';
+  import 'package:flutter/services.dart';
   import '../main.dart';
   import 'dart:math';
 
@@ -59,6 +60,9 @@ import 'package:provider/provider.dart';
     //Screen Shake
     late AnimationController _shakeController;
 
+    // Keyboard Focus
+    late FocusNode _focusNode;
+
     @override
     void initState() {
       super.initState();
@@ -79,14 +83,125 @@ import 'package:provider/provider.dart';
         setState(() {});   
       }
     });
+
+    _focusNode = FocusNode();
+
     }
 
     @override
     void dispose() {
       _confettiController.dispose();
       _shakeController.dispose();
+      _focusNode.dispose();
       super.dispose();
+      
     }
+
+
+    void _triggerSpin() {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    const int gameCost = 100;
+
+    if (gameState.balance < gameCost) return;
+
+    setState(() {
+      // Start spinning animation
+      _spin1 = true;
+      _spin2 = true;
+      _spin3 = true;
+
+      // Staggered stop
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        setState(() => _spin1 = false);
+      });
+
+      Future.delayed(const Duration(milliseconds: 650), () {
+        if (!mounted) return;
+        setState(() => _spin2 = false);
+      });
+
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (!mounted) return;
+        setState(() => _spin3 = false);
+      });
+
+      // Pay cost & show loss popup
+      gameState.subtractBalance(gameCost);
+      gameState.showLossAmount(gameCost);
+
+      // Base random slots
+      slot1 = randomSlot();
+      slot2 = randomSlot();
+      slot3 = randomSlot();
+
+      // Rigging
+      final roll = _rng.nextDouble();
+
+      if (roll < riggedWinChance3) {
+        final forced = randomSlot();
+        slot1 = forced;
+        slot2 = forced;
+        slot3 = forced;
+      } else if (roll < riggedWinChance3 + riggedWinChance2) {
+        final forced = randomSlot();
+        final patternIndex = Random().nextInt(3);
+
+        switch (patternIndex) {
+          case 0:
+            slot1 = randomSlot();
+            slot2 = forced;
+            slot3 = forced;
+            break;
+          case 1:
+            slot1 = forced;
+            slot2 = forced;
+            slot3 = randomSlot();
+            break;
+          case 2:
+            slot1 = forced;
+            slot2 = randomSlot();
+            slot3 = forced;
+            break;
+        }
+      }
+
+      // Reset win state
+      _isWinning = false;
+      _showWinGif = false;
+
+      int moneyWon = 0;
+
+      // Match checking
+      final threeMatch = (slot1 == slot2 && slot2 == slot3);
+      final twoMatch = (!threeMatch) &&
+          (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
+
+      if (threeMatch) {
+        moneyWon = 500;
+
+        _isWinning = true;
+        _showWinGif = true;
+        _confettiController.play();
+        _shakeController.forward(from: 0);
+
+        Future.delayed(const Duration(seconds: 5), () {
+          if (!mounted) return;
+          setState(() {
+            _isWinning = false;
+            _showWinGif = false;
+          });
+        });
+      } else if (twoMatch) {
+        moneyWon = 150;
+      }
+
+      if (moneyWon > 0) {
+        gameState.addBalance(moneyWon);
+        gameState.showWinAmount(moneyWon);
+      }
+    });
+  }
 
     @override
     Widget build(BuildContext context) {
@@ -106,9 +221,6 @@ import 'package:provider/provider.dart';
 
       //Machine image 
       final machineWidth = width * 0.70;
-      
-      final int gameCost = 100;
-      int moneyWon = 0;
 
       final slotMachineBackground = Align(
         alignment: const Alignment(0.1, -0.45),
@@ -128,8 +240,8 @@ import 'package:provider/provider.dart';
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _SlotWindow(imagePath: slot1, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
-              _SlotWindow(imagePath: slot2, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
-              _SlotWindow(imagePath: slot3, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin1,),
+              _SlotWindow(imagePath: slot2, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin2,),
+              _SlotWindow(imagePath: slot3, machineWidth: machineWidth, isWinning: _isWinning, isSpinning: _spin3,),
             ],
           ),
         ),
@@ -142,17 +254,26 @@ import 'package:provider/provider.dart';
           blastDirectionality: BlastDirectionality.explosive,
           shouldLoop: false,
           emissionFrequency: 0.9,
-          numberOfParticles: 40,
-          maxBlastForce: 80,
-          minBlastForce: 30,
-          gravity: 0.1,
+          numberOfParticles: 60,
+          maxBlastForce: 250,
+          minBlastForce: 120,
+          gravity: 0.5,
         ),
       );
 
 
       return Scaffold(
         backgroundColor: theColors.lightPink,
-        body: Transform.translate(
+        body: RawKeyboardListener(
+          focusNode: _focusNode,
+          autofocus: true,
+          onKey: (event) {
+            if (event.isKeyPressed(LogicalKeyboardKey.space)) {
+              _triggerSpin();
+            }
+          },
+
+        child: Transform.translate(
         offset: Offset(shakeOffset, 0),   // screen shaking
         child: Stack(
           children: [
@@ -168,110 +289,7 @@ import 'package:provider/provider.dart';
                   final bool canSpin = gameState.balance >= 100;
 
                   return GestureDetector(
-                    onTap: () {
-                      if (!canSpin) return; // Can't afford, do nothing
-
-                      setState(() {
-                        //Spinning animation
-                        _spin1 = true;
-                        _spin2 = true;
-                        _spin3 = true;
-
-                        // Stop slot
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          if (!mounted) return;
-                          setState(() => _spin1 = false);
-                        });
-
-                        // Stop slot 2
-                        Future.delayed(const Duration(milliseconds: 650), () {
-                          if (!mounted) return;
-                          setState(() => _spin2 = false);
-                        });
-
-                        // Stop slot 3
-                        Future.delayed(const Duration(milliseconds: 800), () {
-                          if (!mounted) return;
-                          setState(() => _spin3 = false);
-                        });
-
-                        gameState.subtractBalance(gameCost);
-                        gameState.showLossAmount(gameCost);
-
-                        slot1 = randomSlot();
-                        slot2 = randomSlot();
-                        slot3 = randomSlot();
-
-                        //Rigging
-                        final roll = _rng.nextDouble();
-
-                        //3 slots
-                        if (roll < riggedWinChance3) {
-                          final forced = randomSlot();
-                          slot1 = forced;
-                          slot2 = forced;
-                          slot3 = forced;
-                        }
-                        //2 slots
-                        else if (roll < riggedWinChance3 + riggedWinChance2) {
-                          final forced = randomSlot();
-                          final patternIndex = Random().nextInt(3);
-
-                          switch (patternIndex) {
-                            case 0:
-                              slot1 = randomSlot();
-                              slot2 = forced;
-                              slot3 = forced;
-                              break;
-                            case 1:
-                              slot1 = forced;
-                              slot2 = forced;
-                              slot3 = randomSlot();
-                              break;
-                            case 2:
-                              slot1 = forced;
-                              slot2 = randomSlot();
-                              slot3 = forced;
-                              break;
-                          }
-                        }
-
-                        //Reward Wins
-                        // Reset win flags by default
-                        _isWinning = false;
-                        _showWinGif = false;
-
-                        // Check matches
-                        final threeMatch = (slot1 == slot2 && slot2 == slot3);
-                        final twoMatch = (!threeMatch) &&
-                            (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
-
-                        if (threeMatch) {
-                          // Big win payout
-                          moneyWon = 500;
-
-                          // Trigger win effects
-                          _isWinning = true;
-                          _showWinGif = true;
-                          _confettiController.play();
-                          _shakeController.forward(from: 0);
-
-                          // Turn off animations after 2 seconds
-                          Future.delayed(const Duration(seconds: 5), () {
-                            if (!mounted) return;
-                            setState(() {
-                              _isWinning = false;
-                              _showWinGif = false;
-                            });
-                          });
-                        } else if (twoMatch) {
-                          // Smaller win
-                          moneyWon = 150;
-                        }
-                        gameState.addBalance(moneyWon);
-                        gameState.showWinAmount(moneyWon);
-                      });
-                    },
+                    onTap: _triggerSpin,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -322,6 +340,7 @@ import 'package:provider/provider.dart';
             ),
 
           confetti,
+
             // Dancing cat GIF
             if (_showWinGif)
             Stack(
@@ -358,6 +377,7 @@ import 'package:provider/provider.dart';
           ],
         ),
         ),
+        ),
       );
     }
   }
@@ -375,7 +395,7 @@ import 'package:provider/provider.dart';
       required this.isWinning,
       required this.isSpinning,
     });
-
+    
     @override
     Widget build(BuildContext context) {
       // size of each window 
