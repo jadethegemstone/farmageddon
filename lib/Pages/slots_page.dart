@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-  import 'package:confetti/confetti.dart';
-  import 'package:flutter/services.dart';
-  import '../main.dart';
-  import 'dart:math';
+import 'package:confetti/confetti.dart';
+import 'package:flutter/services.dart';
+import '../main.dart';
+import 'dart:math';
 
   class SlotsPage extends StatefulWidget {
     const SlotsPage({Key? key}) : super(key: key);
