@@ -46,7 +46,7 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
   final List<Map<String, String>> _powerupCards = [
     {'image': 'Assets/images/3cardmonte/horse_apple.webp', 'type': 'apple'},
     {'image': 'Assets/images/3cardmonte/horse_banana.jpg', 'type': 'banana'},
-    {'image': 'Assets/images/3cardmonte/horse_fish.jpg', 'type': 'fish'},
+    {'image': 'Assets/images/3cardmonte/horse_fish.webp', 'type': 'fish'},
   ];
 
   final String _backImage = 'Assets/images/3cardmonte/sideeye_horse.jpg';
