@@ -7,7 +7,7 @@ import 'layout.dart';
 import 'Pages/main_menu.dart';
 import 'Pages/loan_page.dart';
 import 'Pages/slots_page.dart';
-import 'Pages/plinko_page.dart';
+import 'Pages/3card_monte.dart';
 import 'Pages/blackjack_page.dart';
 
 import 'Pages/Components/win.dart';
@@ -66,6 +66,21 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 
+  void addFish(int amount) {
+    _fish += amount;
+    notifyListeners();
+  }
+
+  void addApple(int amount) {
+    _apple += amount;
+    notifyListeners();
+  }
+
+  void addBanana(int amount) {
+    _banana += amount;
+    notifyListeners();
+  }
+
   void showWinAmount(int amount) {
     _showPopup = true;
     _lastWinAmount = amount;
@@ -120,15 +135,16 @@ class GameState extends ChangeNotifier{
   }
 
   void addTime(int minutes, int seconds) {
-      if (endTime!.isBefore(DateTime.now()) || endTime!.isAtSameMomentAs(DateTime.now())) {
-        _endTime = DateTime.now().add(Duration(
-          minutes: minutes,
-          seconds: seconds,
-        ));
-        _timerRunning = true;
-      }
-      notifyListeners();
+    if (endTime!.isBefore(DateTime.now()) || endTime!.isAtSameMomentAs(DateTime.now())) {
+      _endTime = DateTime.now().add(Duration(
+        minutes: minutes,
+        seconds: seconds,
+      ));
+      _timerRunning = true;
+    }
+    notifyListeners();
   }
+
   void onTimerEnd() {
     _timerRunning = false;
     // Check if player can pay back the loan
@@ -173,11 +189,11 @@ class PixelArtImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return Image.asset (
-       assetPath,
-       fit: BoxFit.cover,
-       filterQuality: FilterQuality.none,
-     );
+    return Image.asset (
+      assetPath,
+      fit: BoxFit.cover,
+      filterQuality: FilterQuality.none,
+    );
   }
 }
 
@@ -192,7 +208,7 @@ void main() {
           '/': (context) => AppLayout(child: MainMenu()),
           '/loan': (context) => AppLayout(child: LoanPage()),
           '/slots': (context) => AppLayout(child: SlotsPage()),
-          '/plinko': (context) => AppLayout(child: PlinkoPage()),
+          '/3cardmonte': (context) => AppLayout(child: ThreeCardMontePage()),
           '/blackjack': (context) => AppLayout(child: BlackjackPage()),
           '/win' : (context) => Win(),
           '/lose' : (context) => Lose(),

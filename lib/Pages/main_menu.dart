@@ -92,7 +92,7 @@ class MainMenu extends StatelessWidget {
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/images/slots/alien_cat.jpg'),
-            CircleGameButton(label: 'PLINKO', route: '/plinko', imagePath: 'Assets/images/plinko/computer_horse.jpg'),
+            CircleGameButton(label: '3 CARD MONTE', route: '/3cardmonte', imagePath: 'Assets/images/3cardmonte/computer_horse.jpg'),
             CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/blackjack/flirting_monkey.jpg'),
             homelessAntImg])
     );
