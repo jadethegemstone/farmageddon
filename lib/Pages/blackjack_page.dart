@@ -35,6 +35,13 @@ class _BlackjackPageState extends State<BlackjackPage> {
   bool _playerTurn = false;
   bool _roundOver = false;
 
+  //Power Ups
+  bool _usePowerUp = false;
+  bool _noPowerUp = false;
+  bool _notStarted = false;
+  bool _alreadyUsedError = false;
+  bool _alreadyUsed = false;
+
   final List<String> _cardBackImages = [
     'Assets/images/blackjack/hehe_monkey.jpeg',
     'Assets/images/blackjack/teehee_monkey.jpeg',
@@ -154,6 +161,7 @@ class _BlackjackPageState extends State<BlackjackPage> {
       _dealerHidden = false;
       _roundOver = true;
       _playerTurn = false;
+      _alreadyUsed = false;
     });
 
     final p = _handTotal(_playerCards);
@@ -289,6 +297,10 @@ class _BlackjackPageState extends State<BlackjackPage> {
     final int playerTotal =
         _playerCards.isEmpty ? 0 : _handTotal(_playerCards);
 
+    Future<void> delay() async {
+      await Future.delayed(Duration(seconds: 3));
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -347,162 +359,252 @@ class _BlackjackPageState extends State<BlackjackPage> {
 
               const SizedBox(width: 16),
 
-              //Side Betting
-              Container(
-                width: size.width * 0.24,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.pink.shade400, width: 2),
-                ),
-                constraints: const BoxConstraints(
-                  minHeight: 350,
-                  maxHeight: 430,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    //Bet Controls
-                    Column(
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //Side Betting
+                  Container (
+                    width: size.width * 0.24,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.pink.shade400, width: 2),
+                    ),
+                    constraints: const BoxConstraints(
+                      minHeight: 350,
+                      maxHeight: 430,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const Text(
-                          "BET",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "\$$_betAmount",
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        //Bet Controls
+                        Column(
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  final next = _betAmount - _betStep;
-                                  if (next >= _minBet) _betAmount = next;
-                                });
-                              },
-                              icon: const Icon(Icons.remove),
+                            const Text(
+                              "BET",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  final next = _betAmount + _betStep;
-                                  if (next <= gameState.balance) {
-                                    _betAmount = next;
-                                  }
-                                });
-                              },
-                              icon: const Icon(Icons.add),
+                            const SizedBox(height: 6),
+                            Text(
+                              "\$$_betAmount",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      final next = _betAmount - _betStep;
+                                      if (next >= _minBet) _betAmount = next;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.remove),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      final next = _betAmount + _betStep;
+                                      if (next <= gameState.balance) {
+                                        _betAmount = next;
+                                      }
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              "Balance: \$${gameState.balance}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Text(
+                              "Min bet: \$500",
+                              style: TextStyle(fontSize: 11),
+                            ),
+                            const SizedBox(height: 8),
+                            if (_currentBet > 0)
+                              Text(
+                                "Current round bet:\n\$$_currentBet",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+
+                        //Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _deal,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.pink.shade400,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "DEAL",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        Text(
-                          "Balance: \$${gameState.balance}",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Text(
-                          "Min bet: \$500",
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        const SizedBox(height: 8),
-                        if (_currentBet > 0)
-                          Text(
-                            "Current round bet:\n\$$_currentBet",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed:
+                                    (_playerTurn && !_roundOver) ? _hit : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green.shade400,
+                                  disabledBackgroundColor:
+                                      Colors.green.shade200,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "HIT",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ),
                             ),
-                          ),
-                        const SizedBox(height: 12),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed:
+                                    (_playerTurn && !_roundOver) ? _stand : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.shade400,
+                                  disabledBackgroundColor:
+                                      Colors.blue.shade200,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "STAND",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
+                    ),
+                  ),
+
+                  // Powerup Button
+                  GestureDetector(
+                    onTap: () async {
+                      if (_playerTurn) {
+                        if (gameState.checkBanana() && !_alreadyUsed) {
+                          _usePowerUp = true;
+                          _alreadyUsed = true;
+                          _dealerHidden = false;
+                          setState(() {});
+                          gameState.subtractBanana(1);
+                          await Future.delayed(const Duration(seconds: 1));
+                          _usePowerUp = false;
+                          setState(() {});
+                        } else if (!gameState.checkBanana()) {
+                          _noPowerUp = true;
+                          setState(() {});
+                          await Future.delayed(const Duration(seconds: 1));
+                          _noPowerUp = false;
+                          setState(() {});
+                        } else {
+                          _alreadyUsedError = true;
+                          setState(() {});
+                          await Future.delayed(const Duration(seconds: 1));
+                          _alreadyUsedError = false;
+                          setState(() {});
+                        }
+                      } else {
+                        _notStarted = true;
+                        setState(() {});
+                        await Future.delayed(const Duration(seconds: 1));
+                        _notStarted = false;
+                        setState(() {});
+                      }
+                    },
+                    child: Image.asset(
+                      width: size.width * 0.06,
+                      height: size.width * 0.06,
+                      'assets/images/powerup.png',
+                    ),
+                  ),
+
+                  if (_notStarted)
+                    Text(
+                      'Start Game before Powering Up!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        letterSpacing: 1.5,
+                      ),
                     ),
 
-                    //Buttons 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _deal,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.pink.shade400,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "DEAL",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ],
+                  if (_alreadyUsedError)
+                    Text(
+                      'Already used Power Up!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed:
-                                (_playerTurn && !_roundOver) ? _hit : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.shade400,
-                              disabledBackgroundColor:
-                                  Colors.green.shade200,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "HIT",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed:
-                                (_playerTurn && !_roundOver) ? _stand : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade400,
-                              disabledBackgroundColor:
-                                  Colors.blue.shade200,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "STAND",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ],
+
+                  if (_noPowerUp)
+                    Text(
+                      'No Banana Power Up!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ],
-                ),
+
+                  if (_usePowerUp)
+                    Text(
+                      'Banana Power Up Used!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

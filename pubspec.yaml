@@ -72,6 +72,7 @@ flutter:
     - Assets/images/blackjack/
     - Assets/images/impactStar.png
     - Assets/images/gregDialogueLoanPage.png
+    - Assets/images/powerup.png
 
 
   # To add assets to your application, add an assets section, like this:

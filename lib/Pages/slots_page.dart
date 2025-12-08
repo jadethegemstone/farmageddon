@@ -35,8 +35,8 @@ import 'dart:math';
     
     //Rigging
     final Random _rng = Random();
-    final double riggedWinChance3 = 0.05;
-    final double riggedWinChance2 = 0.15;
+    double riggedWinChance3 = 0.05;
+    double riggedWinChance2 = 0.15;
 
     String randomSlot() {
       slotImages.shuffle();
@@ -57,6 +57,12 @@ import 'dart:math';
     // Win & streak display
     bool _showWinnerBanner = false;
     int _winStreak = 0;
+
+    // Power Up
+    bool _usePowerUp = false;
+    bool _noPowerUp = false;
+    bool _alreadyUsed = false;
+    bool _alreadyUsedError = false;
 
     // Confetti
     late ConfettiController _confettiController;
@@ -103,127 +109,132 @@ import 'dart:math';
 
 
     void _triggerSpin() {
-    final gameState = Provider.of<GameState>(context, listen: false);
-    const int gameCost = 100;
+      final gameState = Provider.of<GameState>(context, listen: false);
+      const int gameCost = 100;
 
-    if (gameState.balance < gameCost) return;
+      if (gameState.balance < gameCost) return;
 
-    setState(() {
-      // Start spinning animation
-      _spin1 = true;
-      _spin2 = true;
-      _spin3 = true;
+      setState(() {
+        // Start spinning animation
+        _spin1 = true;
+        _spin2 = true;
+        _spin3 = true;
 
-      // Staggered stop
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
-        setState(() => _spin1 = false);
-      });
+        // Staggered stop
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (!mounted) return;
+          setState(() => _spin1 = false);
+        });
 
-      Future.delayed(const Duration(milliseconds: 650), () {
-        if (!mounted) return;
-        setState(() => _spin2 = false);
-      });
+        Future.delayed(const Duration(milliseconds: 650), () {
+          if (!mounted) return;
+          setState(() => _spin2 = false);
+        });
 
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (!mounted) return;
-        setState(() => _spin3 = false);
-      });
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (!mounted) return;
+          setState(() => _spin3 = false);
+        });
 
-      // Pay cost & show loss popup
-      gameState.subtractBalance(gameCost);
-      gameState.showLossAmount(gameCost);
+        // Pay cost & show loss popup
+        gameState.subtractBalance(gameCost);
+        gameState.showLossAmount(gameCost);
 
-      // Base random slots
-      slot1 = randomSlot();
-      slot2 = randomSlot();
-      slot3 = randomSlot();
+        // Base random slots
+        slot1 = randomSlot();
+        slot2 = randomSlot();
+        slot3 = randomSlot();
 
-      // Rigging
-      final roll = _rng.nextDouble();
+        // Rigging
+        final roll = _rng.nextDouble();
 
-      if (roll < riggedWinChance3) {
-        final forced = randomSlot();
-        slot1 = forced;
-        slot2 = forced;
-        slot3 = forced;
-      } else if (roll < riggedWinChance3 + riggedWinChance2) {
-        final forced = randomSlot();
-        final patternIndex = Random().nextInt(3);
+        if (roll < riggedWinChance3) {
+          final forced = randomSlot();
+          slot1 = forced;
+          slot2 = forced;
+          slot3 = forced;
+        } else if (roll < riggedWinChance3 + riggedWinChance2) {
+          final forced = randomSlot();
+          final patternIndex = Random().nextInt(3);
 
-        switch (patternIndex) {
-          case 0:
-            slot1 = randomSlot();
-            slot2 = forced;
-            slot3 = forced;
-            break;
-          case 1:
-            slot1 = forced;
-            slot2 = forced;
-            slot3 = randomSlot();
-            break;
-          case 2:
-            slot1 = forced;
-            slot2 = randomSlot();
-            slot3 = forced;
-            break;
+          switch (patternIndex) {
+            case 0:
+              slot1 = randomSlot();
+              slot2 = forced;
+              slot3 = forced;
+              break;
+            case 1:
+              slot1 = forced;
+              slot2 = forced;
+              slot3 = randomSlot();
+              break;
+            case 2:
+              slot1 = forced;
+              slot2 = randomSlot();
+              slot3 = forced;
+              break;
+          }
         }
-      }
 
-      // Reset win state
-      _isWinning = false;
-      _showWinGif = false;
+        // Reset win state
+        _isWinning = false;
+        _showWinGif = false;
 
-      int moneyWon = 0;
+        int moneyWon = 0;
 
-      // Match checking
-      final threeMatch = (slot1 == slot2 && slot2 == slot3);
-      final twoMatch = (!threeMatch) &&
-          (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
+        // Match checking
+        final threeMatch = (slot1 == slot2 && slot2 == slot3);
+        final twoMatch = (!threeMatch) &&
+            (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
 
-      if (threeMatch) {
-        moneyWon = 500;
+        if (threeMatch) {
+          moneyWon = 500;
 
-        _isWinning = true;
-        _showWinGif = true;
-        _confettiController.play();
-        _shakeController.forward(from: 0);
+          _isWinning = true;
+          _showWinGif = true;
+          _confettiController.play();
+          _shakeController.forward(from: 0);
 
-        Future.delayed(const Duration(seconds: 5), () {
-          if (!mounted) return;
-          setState(() {
-            _isWinning = false;
-            _showWinGif = false;
+          Future.delayed(const Duration(seconds: 5), () {
+            if (!mounted) return;
+            setState(() {
+              _isWinning = false;
+              _showWinGif = false;
+            });
           });
-        });
-      } else if (twoMatch) {
-        moneyWon = 150;
-      }
+        } else if (twoMatch) {
+          moneyWon = 150;
+        }
 
-       // --- WIN STREAK LOGIC ---
-      if (moneyWon > 0) {
-        //Increase streak
-        _winStreak++;
+         // --- WIN STREAK LOGIC ---
+        if (moneyWon > 0) {
+          //Increase streak
+          _winStreak++;
 
-        //Winner Banner
-        _showWinnerBanner = true;
+          //Winner Banner
+          _showWinnerBanner = true;
 
-        gameState.addBalance(moneyWon);
-        gameState.showWinAmount(moneyWon);
+          gameState.addBalance(moneyWon);
+          gameState.showWinAmount(moneyWon);
 
-        Future.delayed(const Duration(seconds: 3), () {
-          if (!mounted) return;
-          setState(() {
-            _showWinnerBanner = false;
+          Future.delayed(const Duration(seconds: 3), () {
+            if (!mounted) return;
+            setState(() {
+              _showWinnerBanner = false;
+            });
           });
-        });
-      } else {
-        // Lost -> reset streak and hide banner
-        _winStreak = 0;
-        _showWinnerBanner = false;
-      }
-    });
-  }
+        } else {
+          // Lost -> reset streak and hide banner
+          _winStreak = 0;
+          _showWinnerBanner = false;
+        }
+
+        // setting Win Chance back to original after power up used
+        riggedWinChance3 = 0.05;
+        riggedWinChance2 = 0.15;
+        _alreadyUsed = false;
+      });
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -302,60 +313,137 @@ import 'dart:math';
             slotMachineBackground,
             threeCatWindow,
 
-            //SPIN BUTTON with cost popup
+
             Positioned(
-              left: width * 0.07,
+              left: width * 0.05,
               bottom: height * 0.06,
               child: Consumer<GameState>(
                 builder: (context, gameState, child) {
                   final bool canSpin = gameState.balance >= 100;
 
-                  return GestureDetector(
-                    onTap: _triggerSpin,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Opacity(
-                          opacity: canSpin ? 1.0 : 0.5,
-                          child: Container(
-                            width: width * 0.06,
-                            height: width * 0.06,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: canSpin
-                                  ? const RadialGradient(
-                                colors: [Colors.redAccent, Colors.red],
-                              )
-                                  : const RadialGradient(
-                                colors: [Colors.grey, Colors.grey],
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  offset: Offset(4, 6),
-                                  blurRadius: 6,
-                                ),
-                              ],
-                            ),
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_noPowerUp)
+                        Text(
+                          'No Fish Power Up!',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            letterSpacing: 1.5,
                           ),
                         ),
-                        SizedBox(width: width * 0.02), // Space between button and text
-                        // Cost popup
-                        if (gameState.lastLossAmount > 0)
-                          AnimatedOpacity(
-                            opacity: gameState.showPopup ? 1.0 : 0.0,
-                            duration: Duration(milliseconds: 300),
-                            child: Text(
-                              '-\$${NumberFormat('#,###').format(gameState.lastLossAmount)}',
-                              style: TextStyle(
-                                fontSize: M,
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
+
+                      if (_alreadyUsedError)
+                        Text(
+                          'Fish Power Up Used Already!',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+
+                      if (_usePowerUp)
+                        Text(
+                          'Fish Power Up Used!',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+
+                      // Powerup Button
+                      GestureDetector(
+                        onTap: () async {
+                          if (gameState.checkFish() && !_alreadyUsed) {
+                            _usePowerUp = true;
+                            _alreadyUsed = true;
+                            setState(() {});
+                            gameState.subtractFish(1);
+                            // better chance to win
+                            riggedWinChance3 = 0.15;
+                            riggedWinChance2 = 0.30;
+                            await Future.delayed(const Duration(seconds: 1));
+                            _usePowerUp = false;
+                            setState(() {});
+                          } else if (!gameState.checkFish()){
+                            _noPowerUp = true;
+                            setState(() {});
+                            await Future.delayed(const Duration(seconds: 1));
+                            _noPowerUp = false;
+                            setState(() {});
+                          } else {
+                            _alreadyUsedError = true;
+                            setState(() {});
+                            await Future.delayed(const Duration(seconds: 1));
+                            _alreadyUsedError = false;
+                            setState(() {});
+                          }
+                        },
+                        child: Image.asset(
+                          width: width * 0.06,
+                          height: width * 0.1,
+                          'assets/images/powerup.png',
+                        ),
+                      ),
+
+                      SizedBox(height: height * 0.03), // Space between buttons
+
+                      // Red Spin Button
+                      GestureDetector(
+                        onTap: _triggerSpin,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Opacity(
+                              opacity: canSpin ? 1.0 : 0.5,
+                              child: Container(
+                                width: width * 0.06,
+                                height: width * 0.06,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: canSpin
+                                      ? const RadialGradient(
+                                    colors: [Colors.redAccent, Colors.red],
+                                  )
+                                      : const RadialGradient(
+                                    colors: [Colors.grey, Colors.grey],
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      offset: Offset(4, 6),
+                                      blurRadius: 6,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
+                            SizedBox(width: width * 0.02), // Space between button and text
+                            // Cost popup
+                            if (gameState.lastLossAmount > 0)
+                              AnimatedOpacity(
+                                opacity: gameState.showPopup ? 1.0 : 0.0,
+                                duration: Duration(milliseconds: 300),
+                                child: Text(
+                                  '-\$${NumberFormat('#,###').format(gameState.lastLossAmount)}',
+                                  style: TextStyle(
+                                    fontSize: M,
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
