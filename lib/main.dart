@@ -71,14 +71,53 @@ class GameState extends ChangeNotifier{
     notifyListeners();
   }
 
+  void subtractFish(int amount) {
+    _fish -= amount;
+    notifyListeners();
+  }
+
+  bool checkFish() {
+    if(_fish == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   void addApple(int amount) {
     _apple += amount;
     notifyListeners();
   }
 
+  void subtractApple(int amount) {
+    _apple -= amount;
+    notifyListeners();
+  }
+
+  bool checkApple() {
+    if(_apple == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   void addBanana(int amount) {
     _banana += amount;
     notifyListeners();
+  }
+
+  void subtractBanana(int amount) {
+    _banana -= amount;
+    notifyListeners();
+  }
+
+  bool checkBanana() {
+    if(_banana == 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   void showWinAmount(int amount) {

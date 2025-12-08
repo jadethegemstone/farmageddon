@@ -19,10 +19,19 @@ class ThreeCardMontePage extends StatefulWidget {
 }
 
 class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
+  // power up bools
+  bool _usePowerUp = false;
+  bool _noPowerUp = false;
+  bool _alreadyUsed = false;
+  bool _alreadyUsedError = false;
+  bool _playerTurn = true;
+  bool _notStarted = false;
+
   final Random _rng = Random();
 
   List<_MonteCard> _cards = [];
   bool _showAll = false;
+  int? _revealedCardIndex;
   String _message = "Pick a card!";
   int _correctIndex = 0;
 
@@ -59,7 +68,9 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
 
   void _resetGame() {
     _showAll = false;
+    _revealedCardIndex = null; // Reset revealed card
     _message = "Pick a card!";
+    _playerTurn = true;
 
     if (_powerupMode) {
       final powerup = _powerupCards[_rng.nextInt(_powerupCards.length)];
@@ -74,6 +85,7 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
         _MonteCard('card1', chosenNormals[0]),
         _MonteCard('card2', chosenNormals[1]),
       ];
+
       tempCards.shuffle(_rng);
       _cards = tempCards;
       _correctIndex = _cards.indexWhere((c) => c.image == powerup['image']);
@@ -89,6 +101,8 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
   void _pickCard(int index) {
     final gameState = Provider.of<GameState>(context, listen: false);
     final cost = _powerupMode ? _powerupCost : _currentBet;
+
+    _playerTurn = false;
 
     if (gameState.balance < cost) {
       setState(() => _message = "Not enough money!");
@@ -124,14 +138,35 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
       } else {
         _message = "Wrong card!";
       }
+
+      _alreadyUsed = false;
+      _revealedCardIndex = null;
     });
   }
 
+  void _revealOneCard() {
+    // Find a card that is NOT the correct card
+    List<int> wrongCards = [];
+    for (int i = 0; i < _cards.length; i++) {
+      if (i != _correctIndex) {
+        wrongCards.add(i);
+      }
+    }
+
+    // Randomly pick one of the wrong cards to reveal
+    if (wrongCards.isNotEmpty) {
+      _revealedCardIndex = wrongCards[_rng.nextInt(wrongCards.length)];
+    }
+  }
+
   Widget _cardWidget(_MonteCard card, bool reveal) {
-    final isWinner = _cards.indexOf(card) == _correctIndex;
+    final cardIndex = _cards.indexOf(card);
+    final isWinner = cardIndex == _correctIndex;
+    final shouldReveal = reveal || (_revealedCardIndex == cardIndex);
+
     return GestureDetector(
       onTap: () {
-        if (!_showAll) _pickCard(_cards.indexOf(card));
+        if (!_showAll) _pickCard(cardIndex);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -153,7 +188,7 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
         ),
         clipBehavior: Clip.hardEdge,
         child: Image.asset(
-          reveal ? card.image : _backImage,
+          shouldReveal ? card.image : _backImage,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.none,
         ),
@@ -264,6 +299,91 @@ class _ThreeCardMontePageState extends State<ThreeCardMontePage> {
                   ],
                 ),
               ),
+
+              // Powerup Button
+              GestureDetector(
+                onTap: () async {
+                  if (_playerTurn) {
+                    if (gameState.checkApple() && !_alreadyUsed) {
+                      _usePowerUp = true;
+                      _alreadyUsed = true;
+                      _revealOneCard();
+                      setState(() {});
+                      gameState.subtractApple(1);
+                      await Future.delayed(const Duration(seconds: 1));
+                      _usePowerUp = false;
+                      setState(() {});
+                    } else if (!gameState.checkApple()) {
+                      _noPowerUp = true;
+                      setState(() {});
+                      await Future.delayed(const Duration(seconds: 1));
+                      _noPowerUp = false;
+                      setState(() {});
+                    } else {
+                      _alreadyUsedError = true;
+                      setState(() {});
+                      await Future.delayed(const Duration(seconds: 1));
+                      _alreadyUsedError = false;
+                      setState(() {});
+                    }
+                  } else {
+                    _notStarted = true;
+                    setState(() {});
+                    await Future.delayed(const Duration(seconds: 1));
+                    _notStarted = false;
+                    setState(() {});
+                  }
+                },
+                child: Image.asset(
+                  width: size.width * 0.06,
+                  height: size.width * 0.06,
+                  'assets/images/powerup.png',
+                ),
+              ),
+
+              if (_notStarted)
+                Text(
+                  'Start Game before Powering Up!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+
+              if (_alreadyUsedError)
+                Text(
+                  'Already used Power Up!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+
+              if (_noPowerUp)
+                Text(
+                  'No Apple Power Up!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+
+              if (_usePowerUp)
+                Text(
+                  'Apple Power Up Used!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    letterSpacing: 1.5,
+                  ),
+                ),
             ],
           ),
         ),
