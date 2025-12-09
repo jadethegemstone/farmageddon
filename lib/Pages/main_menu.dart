@@ -91,9 +91,27 @@ class MainMenu extends StatelessWidget {
     final bottomRow = Container (
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/images/slots/alien_cat.jpg', minBalance: 0),
-              CircleGameButton(label: '3 CARD MONTE', route: '/3cardmonte', imagePath: 'Assets/images/3cardmonte/computer_horse.jpg', minBalance: 10000),
-              CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/blackjack/flirting_monkey.jpg', minBalance: 15000),
+              CircleGameButton(
+                label: 'SLOTS',
+                route: '/slots',
+                imagePath: 'Assets/images/slots/alien_cat.jpg',
+                cost: 0,
+                gameId: 'slots',
+              ),
+              CircleGameButton(
+                label: '3 CARD MONTE',
+                route: '/3cardmonte',
+                imagePath: 'Assets/images/3cardmonte/computer_horse.jpg',
+                cost: 10000,
+                gameId: '3cardmonte',
+              ),
+              CircleGameButton(
+                label: 'BLACKJACK',
+                route: '/blackjack',
+                imagePath: 'Assets/images/blackjack/flirting_monkey.jpg',
+                cost: 15000,
+                gameId: 'blackjack',
+              ),
               homelessAntImg])
     );
 
@@ -115,34 +133,43 @@ class CircleGameButton extends StatelessWidget {
   final String label;
   final String route;
   final String imagePath;
-  final int minBalance;
+  final int cost;
+  final String gameId;
 
   const CircleGameButton({
     Key? key,
     required this.label,
     required this.route,
     required this.imagePath,
-    required this.minBalance,
+    required this.cost,
+    required this.gameId,
   }) : super (key: key);
 
   @override
   Widget build(BuildContext context) {
     final width = context.screenWidth;
     final S = context.fontS;
+    final XS = context.fontS;
 
-    final currentBalance = context.watch<GameState>().balance;
-    final canPlay = currentBalance >= minBalance;
+    final gameState = context.watch<GameState>();
+    final currentBalance = gameState.balance;
+    final isOwned = gameState.ownedGames.contains(gameId);
+    final canAfford = currentBalance >= cost;
+    final isFree = cost == 0;
+
+    final isEnabled = isFree || isOwned;
+    final showBuyOption = !isFree && !isOwned;
 
     return Opacity(
-      opacity: canPlay ? 1.0 : 0.5,
+      opacity: isEnabled ? 1.0 : 0.5,
       child: ElevatedButton (
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(canPlay ? Colors.white : Colors.grey[300]),
-          foregroundColor: WidgetStateProperty.all(canPlay ? theColors.darkPink : Colors.grey),
+          backgroundColor: WidgetStateProperty.all(isEnabled ? Colors.white : Colors.grey[300]),
+          foregroundColor: WidgetStateProperty.all(isEnabled ? theColors.darkPink : Colors.grey),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(1000),
-              side: BorderSide(width: width * .003, color: canPlay ? theColors.darkPink : Colors.grey),
+              side: BorderSide(width: width * .003, color: isEnabled ? theColors.darkPink : Colors.grey),
             ),
           ),
           padding: WidgetStateProperty.all(EdgeInsets.zero),
@@ -154,7 +181,7 @@ class CircleGameButton extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: canPlay ? theColors.darkPink : Colors.grey,
+                color: isEnabled ? theColors.darkPink : Colors.grey,
                 width: width * .003,
               ),
             ),
@@ -164,24 +191,63 @@ class CircleGameButton extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       ColorFiltered(
-                        colorFilter: canPlay
+                        colorFilter: isEnabled
                             ? ColorFilter.mode(Colors.transparent, BlendMode.multiply)
                             : ColorFilter.mode(Colors.grey, BlendMode.saturation),
                         child: Image.asset(imagePath, fit: BoxFit.cover,),
                       ),
-                      Text(label,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: S,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                  offset: Offset(2, 2),
-                                  blurRadius: 3,
-                                  color: Colors.black
-                              )
-                            ]
-                        ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            showBuyOption ? 'BUY' : label,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: showBuyOption ? XS : S,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                      offset: Offset(2, 2),
+                                      blurRadius: 3,
+                                      color: Colors.black
+                                  )
+                                ]
+                            ),
+                          ),
+                          if (showBuyOption) ...[
+                            Text(
+                              label,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: XS,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                        offset: Offset(2, 2),
+                                        blurRadius: 3,
+                                        color: Colors.black
+                                    )
+                                  ]
+                              ),
+                            ),
+                            Text(
+                              '(\$${cost.toString()})',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: XS,
+                                  color: canAfford ? Colors.greenAccent : Colors.redAccent,
+                                  shadows: [
+                                    Shadow(
+                                        offset: Offset(2, 2),
+                                        blurRadius: 3,
+                                        color: Colors.black
+                                    )
+                                  ]
+                              ),
+                            ),
+                          ]
+                        ],
                       )
                     ],
                   )
@@ -189,7 +255,34 @@ class CircleGameButton extends StatelessWidget {
             ),
           ),
         ),
-        onPressed: canPlay ? () => Navigator.pushNamed(context, route) : null,
+        onPressed: () {
+          if (isOwned || isFree) {
+            Navigator.pushNamed(context, route);
+          } else if (showBuyOption && canAfford) {
+            showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  title: Text('Purchase $label'),
+                  content: Text('Do you want to buy $label for \$${cost.toString()}?'),
+                  actions: [
+                    TextButton(
+                      child: Text('Cancel'),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                    ),
+                    TextButton(
+                      child: Text('Buy'),
+                      onPressed: () {
+                        gameState.purchaseGame(gameId, cost);
+                        Navigator.of(dialogContext).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }

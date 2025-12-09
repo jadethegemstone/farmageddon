@@ -120,6 +120,17 @@ class GameState extends ChangeNotifier{
     }
   }
 
+  Set<String> ownedGames = {'slots'};
+
+  void purchaseGame(String gameId, int cost) {
+    if (_balance >= cost) {
+      _balance -= cost;
+      ownedGames.add(gameId);
+      notifyListeners();
+    }
+
+  }
+
   void showWinAmount(int amount) {
     _showPopup = true;
     _lastWinAmount = amount;
