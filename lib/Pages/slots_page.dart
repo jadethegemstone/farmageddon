@@ -367,8 +367,8 @@ import 'dart:math';
                             setState(() {});
                             gameState.subtractFish(1);
                             // better chance to win
-                            riggedWinChance3 = 0.15;
-                            riggedWinChance2 = 0.30;
+                            riggedWinChance3 = 0.20;
+                            riggedWinChance2 = 0.67;
                             await Future.delayed(const Duration(seconds: 1));
                             _usePowerUp = false;
                             setState(() {});
