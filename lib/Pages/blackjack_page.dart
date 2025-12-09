@@ -217,7 +217,6 @@ class _BlackjackPageState extends State<BlackjackPage> {
     return Container(
       width: w,
       height: h,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -254,8 +253,10 @@ class _BlackjackPageState extends State<BlackjackPage> {
   Widget _dealerRow(double cw, double ch) {
     if (_dealerCards.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 4, // horizontal spacing between cards
+      runSpacing: 8, // vertical spacing if cards wrap to next line
       children: _dealerCards.asMap().entries.map((entry) {
         int index = entry.key;
         _BJCard card = entry.value;
@@ -271,8 +272,10 @@ class _BlackjackPageState extends State<BlackjackPage> {
   Widget _playerRow(double cw, double ch) {
     if (_playerCards.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 4, // horizontal spacing between cards
+      runSpacing: 8, // vertical spacing if cards wrap to next line
       children: _playerCards.map((c) => _cardFront(c, cw, ch)).toList(),
     );
   }
@@ -283,7 +286,7 @@ class _BlackjackPageState extends State<BlackjackPage> {
     final size = MediaQuery.of(context).size;
 
     final cardWidth = size.width * 0.10;
-    final cardHeight = cardWidth * 1.45;
+    final cardHeight = cardWidth * 1.20;
 
     int dealerTotal;
     if (_dealerCards.isEmpty) {
@@ -307,10 +310,27 @@ class _BlackjackPageState extends State<BlackjackPage> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Spacer(),
               //Main Game
-              Expanded(
+// Main Game
+              Container(
+                constraints: BoxConstraints(
+                  minWidth: size.width * 0.24, // Minimum width
+                  maxWidth: size.width * 0.6,  // Maximum width it can expand to
+                ),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(30)
+                ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
                     const Text(
@@ -353,11 +373,11 @@ class _BlackjackPageState extends State<BlackjackPage> {
                     ),
                     const SizedBox(height: 6),
                     _playerRow(cardWidth, cardHeight),
+
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
-
-              const SizedBox(width: 16),
 
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -606,6 +626,7 @@ class _BlackjackPageState extends State<BlackjackPage> {
                     ),
                 ],
               ),
+              Spacer(),
             ],
           ),
         ),
