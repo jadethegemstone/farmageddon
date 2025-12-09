@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import '../main.dart';
 
 class MainMenu extends StatelessWidget {
@@ -89,12 +89,12 @@ class MainMenu extends StatelessWidget {
           children:[topRowColLeft, topRowColRight]),
     );
     final bottomRow = Container (
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/images/slots/alien_cat.jpg'),
-            CircleGameButton(label: '3 CARD MONTE', route: '/3cardmonte', imagePath: 'Assets/images/3cardmonte/computer_horse.jpg'),
-            CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/blackjack/flirting_monkey.jpg'),
-            homelessAntImg])
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              CircleGameButton(label: 'SLOTS', route: '/slots', imagePath: 'Assets/images/slots/alien_cat.jpg', minBalance: 0),
+              CircleGameButton(label: '3 CARD MONTE', route: '/3cardmonte', imagePath: 'Assets/images/3cardmonte/computer_horse.jpg', minBalance: 10000),
+              CircleGameButton(label: 'BLACKJACK', route: '/blackjack', imagePath: 'Assets/images/blackjack/flirting_monkey.jpg', minBalance: 15000),
+              homelessAntImg])
     );
 
     return Scaffold (
@@ -115,68 +115,82 @@ class CircleGameButton extends StatelessWidget {
   final String label;
   final String route;
   final String imagePath;
-  
+  final int minBalance;
+
   const CircleGameButton({
     Key? key,
     required this.label,
     required this.route,
-    required this.imagePath
+    required this.imagePath,
+    required this.minBalance,
   }) : super (key: key);
 
   @override
   Widget build(BuildContext context) {
     final width = context.screenWidth;
     final S = context.fontS;
-    return ElevatedButton (
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.white),
-        foregroundColor: WidgetStateProperty.all(theColors.darkPink),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(1000),
-            side: BorderSide(width: width * .003, color: theColors.darkPink),
-          ),
-        ),
-        padding: WidgetStateProperty.all(EdgeInsets.zero),
-      ),
-      child: SizedBox (
-        width: width * .13,
-        height: width * .13,
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: theColors.darkPink,
-              width: width * .003,
+
+    final currentBalance = context.watch<GameState>().balance;
+    final canPlay = currentBalance >= minBalance;
+
+    return Opacity(
+      opacity: canPlay ? 1.0 : 0.5,
+      child: ElevatedButton (
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(canPlay ? Colors.white : Colors.grey[300]),
+          foregroundColor: WidgetStateProperty.all(canPlay ? theColors.darkPink : Colors.grey),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(1000),
+              side: BorderSide(width: width * .003, color: canPlay ? theColors.darkPink : Colors.grey),
             ),
           ),
-        child: ClipOval(
-        child: (
-          Stack (
-            alignment: Alignment.center,
-            children: [
-              Image.asset(imagePath, fit: BoxFit.cover,),
-              Text(label,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: S,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(2, 2),
-                          blurRadius: 3,
-                          color: Colors.black
-                      )
-                    ]
-                ),
-              )
-            ],
-          )
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
         ),
+        child: SizedBox (
+          width: width * .13,
+          height: width * .13,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: canPlay ? theColors.darkPink : Colors.grey,
+                width: width * .003,
+              ),
+            ),
+            child: ClipOval(
+              child: (
+                  Stack (
+                    alignment: Alignment.center,
+                    children: [
+                      ColorFiltered(
+                        colorFilter: canPlay
+                            ? ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+                            : ColorFilter.mode(Colors.grey, BlendMode.saturation),
+                        child: Image.asset(imagePath, fit: BoxFit.cover,),
+                      ),
+                      Text(label,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: S,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                  offset: Offset(2, 2),
+                                  blurRadius: 3,
+                                  color: Colors.black
+                              )
+                            ]
+                        ),
+                      )
+                    ],
+                  )
+              ),
+            ),
+          ),
+        ),
+        onPressed: canPlay ? () => Navigator.pushNamed(context, route) : null,
       ),
-      ),
-      ),
-      onPressed: () => Navigator.pushNamed(context, route),
     );
   }
 }
