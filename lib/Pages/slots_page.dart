@@ -35,8 +35,8 @@ import 'dart:math';
     
     //Rigging
     final Random _rng = Random();
-    double riggedWinChance3 = 0.05;
-    double riggedWinChance2 = 0.15;
+    double riggedWinChance3 = 0.10;
+    double riggedWinChance2 = 0.20;
 
     String randomSlot() {
       slotImages.shuffle();
@@ -110,7 +110,7 @@ import 'dart:math';
 
     void _triggerSpin() {
       final gameState = Provider.of<GameState>(context, listen: false);
-      const int gameCost = 100;
+      const int gameCost = 50;
 
       if (gameState.balance < gameCost) return;
 
@@ -188,7 +188,7 @@ import 'dart:math';
             (slot1 == slot2 || slot2 == slot3 || slot1 == slot3);
 
         if (threeMatch) {
-          moneyWon = 500;
+          moneyWon = 1000;
 
           _isWinning = true;
           _showWinGif = true;
@@ -203,7 +203,7 @@ import 'dart:math';
             });
           });
         } else if (twoMatch) {
-          moneyWon = 150;
+          moneyWon = 250;
         }
 
          // --- WIN STREAK LOGIC ---
