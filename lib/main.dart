@@ -21,7 +21,7 @@ class GameState extends ChangeNotifier{
     _endTime = DateTime.now();
   }
 
-  int _balance = 20000;
+  int _balance = 5000;
   int _lives = 5;
   int _totalLives = 5;
   int _fish = 0;
